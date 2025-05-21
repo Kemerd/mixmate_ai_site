@@ -161,7 +161,7 @@ const Header: React.FC = () => {
       <Nav>
         {/* Discord Button with SVG */}
         <DiscordButton 
-          href="https://discord.gg/mixmate" 
+          href="https://discord.gg/ZEJ97uwSSX" 
           target="_blank" 
           rel="noopener noreferrer"
           variants={bounceScale}
