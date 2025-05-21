@@ -105,6 +105,26 @@ const FeatureDescription = styled(motion.p)`
   font-size: ${({ theme }) => theme.typography.fontSize.base};
   color: ${({ theme }) => theme.colors.text.secondary};
   line-height: 1.6;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+const ComingSoonPill = styled(motion.div)`
+  position: absolute;
+  bottom: ${({ theme }) => theme.spacing.md};
+  right: ${({ theme }) => theme.spacing.md};
+  background: ${({ theme }) => `linear-gradient(
+    135deg,
+    ${theme.colors.accent}80 0%,
+    ${theme.colors.accent} 100%
+  )`};
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.background.primary};
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
 `;
 
 const features = [
@@ -112,31 +132,37 @@ const features = [
         icon: '🎛️',
         title: 'Complete DAW Integration',
         description: 'Connects directly to your DAW through OSC communication, understanding every aspect of your production.',
+        comingSoon: false
     },
     {
         icon: '🧠',
         title: 'AI-Powered Mixing Suggestions',
         description: 'Get context-aware mixing advice based on your specific project, plugins, and genre.',
+        comingSoon: false
     },
     {
         icon: '🔊',
         title: 'Real-time Audio Analysis',
         description: 'Advanced analysis of your tracks to understand spectral relationships and provide precise feedback.',
+        comingSoon: true
     },
     {
         icon: '🎚️',
         title: 'Parameter Adjustment Guidance',
         description: 'Learn exactly which knobs to turn and by how much to achieve professional sound.',
+        comingSoon: false
     },
     {
         icon: '🔌',
         title: 'Plugin Intelligence',
         description: 'MixMate recognizes all your VSTs and plugins—even custom ones—and understands how to use them effectively.',
+        comingSoon: false
     },
     {
         icon: '📊',
         title: 'Comprehensive Analysis',
         description: 'Generates spectrograms, dB analysis, transient detection and dozens of audio metrics.',
+        comingSoon: true
     },
 ];
 
@@ -193,6 +219,25 @@ const Features: React.FC = () => {
                             </FeatureIcon>
                             <FeatureTitle>{feature.title}</FeatureTitle>
                             <FeatureDescription>{feature.description}</FeatureDescription>
+                            
+                            {feature.comingSoon && (
+                                <ComingSoonPill
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{
+                                        type: 'spring',
+                                        stiffness: 400,
+                                        damping: 20,
+                                        delay: index * 0.1 + 0.3,
+                                    }}
+                                    whileHover={{
+                                        scale: 1.05,
+                                        transition: { type: 'spring', stiffness: 400 }
+                                    }}
+                                >
+                                    Coming Soon
+                                </ComingSoonPill>
+                            )}
                         </FeatureCard>
                     ))}
                 </FeaturesGrid>
