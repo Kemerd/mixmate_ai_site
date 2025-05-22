@@ -280,7 +280,7 @@ const Hero: React.FC = () => {
             }}
           >
             <ButtonIcon 
-              src="/assets/images/brand-logos/windows.svg" 
+              src={`${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`}
               alt="Windows logo"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -300,7 +300,7 @@ const Hero: React.FC = () => {
             }}
           >
             <ButtonIcon 
-              src="/assets/images/brand-logos/macos.svg" 
+              src={`${process.env.PUBLIC_URL}/assets/images/brand-logos/macos.svg`}
               alt="MacOS logo" 
               $disabled={true}
               style={{ 
@@ -322,7 +322,7 @@ const Hero: React.FC = () => {
           variants={fadeUpVariant}
         >
           <DAWInterfaceImage
-            src="/assets/images/mixmate_preview_test.png"
+            src={`${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`}
             alt="MixMate AI Application Interface"
             initial={{ y: 20 }}
             animate={{

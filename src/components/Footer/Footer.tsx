@@ -133,7 +133,7 @@ const Footer: React.FC = () => {
       >
         <Column>
           <Logo href="/" variants={bounceScale} whileHover="hover" whileTap="tap">
-            <img src="/assets/logo/logo_text_green_white.svg" alt="mixmate.ai Logo" />
+            <img src={`${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`} alt="mixmate.ai Logo" />
           </Logo>
           <Description>
             The world's first intelligent production assistant that creates a direct neural bridge between your DAW and advanced AI.
