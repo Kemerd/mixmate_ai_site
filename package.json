@@ -2,7 +2,7 @@
   "name": "mixmate-website",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://mixmate.ai",
+  "homepage": "https://kemerd.github.io/mixmate_ai_site",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
