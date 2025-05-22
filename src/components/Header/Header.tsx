@@ -204,7 +204,7 @@ const Header: React.FC = () => {
         whileTap="tap"
         animate={logoControls} // Apply the rhythmic animation
       >
-        <img src="/logo192.png" alt="mixmate.ai Logo" />
+        <img src={`${process.env.PUBLIC_URL}/logo192.png`} alt="mixmate.ai Logo" />
       </Logo>
 
       <Nav>
