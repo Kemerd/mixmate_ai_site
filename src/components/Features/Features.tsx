@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 
@@ -152,9 +152,61 @@ const BackgroundEffectContainer = styled(motion.div)`
   overflow: visible;
 `;
 
+// Custom hook for 120 BPM kick animation
+const useKickAnimation = (bpm = 120): AnimationControls => {
+  const controls = useAnimation();
+  const kickInterval = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Calculate timing: 60000ms / BPM = ms per beat
+    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
+    const kickDuration = 0.1 * beatDuration; // Quick expansion (50ms for 120 BPM)
+    
+    const startAnimation = () => {
+      kickInterval.current = setInterval(() => {
+        // The kick animation sequence
+        controls.start({
+          // Quick expansion
+          height: 1250,
+          y: -10, // Slight upward movement
+          transition: {
+            duration: kickDuration / 1000, // Convert to seconds
+            ease: [0.04, 0.62, 0.23, 0.98], // Custom easing for quick expansion
+          },
+        }).then(() => {
+          // Spring back
+          controls.start({
+            height: 1100,
+            y: 0,
+            transition: {
+              type: "spring",
+              stiffness: 300,
+              damping: 15,
+              duration: (beatDuration - kickDuration) / 1000, // Remaining time in the beat
+            },
+          });
+        });
+      }, beatDuration);
+    };
+
+    // Start the animation when in view
+    startAnimation();
+
+    // Clean up on unmount
+    return () => {
+      if (kickInterval.current) {
+        clearInterval(kickInterval.current);
+      }
+    };
+  }, [bpm, controls]);
+
+  return controls;
+};
+
+// Updated BackgroundSVG component with base height
 const BackgroundSVG = styled(motion.img)`
   max-width: 1500px; 
-  height: 1250px;
+  height: 1100px; /* Base height before animation */
   opacity: 0.8;
   position: relative;
   /* Add a slight transform to extend even wider */
@@ -232,6 +284,7 @@ const features = [
 
 const Features: React.FC = () => {
     const { ref, controls } = useInView();
+    const kickControls = useKickAnimation(120); // 120 BPM kick animation
 
     return (
         <FeaturesSection id="features" ref={ref}>
@@ -246,6 +299,7 @@ const Features: React.FC = () => {
                     src="/assets/images/squircle_rectangle.svg" 
                     alt=""
                     variants={fadeUpVariant}
+                    animate={kickControls} // Apply kick animation controls
                   />
                 </BackgroundEffectContainer>
 
