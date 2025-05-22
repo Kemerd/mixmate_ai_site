@@ -267,7 +267,7 @@ const useSnareAnimation = (bpm = 120, currentBeat: number): AnimationControls =>
         scale: 1.05,
         filter: "brightness(1.2) contrast(1.1)",
         // More pronounced RGB split
-        textShadow: "2px 0 0 rgba(255,0,0,0.7), -2px 0 0 rgba(0,255,255,0.7)",
+        textShadow: "3px 0 0 rgba(255,0,0,0.85), -3px 0 0 rgba(0,255,255,0.85), 0 2px 0 rgba(0,255,0,0.6)",
         transition: {
           duration: snareDuration / 1000,
           ease: [0.04, 0.62, 0.23, 0.98],
@@ -402,8 +402,8 @@ const Features: React.FC = () => {
                     transition={{ type: "spring", stiffness: 300 }}
                     animate={snareControls} // Apply snare animation controls
                     style={{
-                      // Apply chromatic aberration manually for more control
-                      filter: "drop-shadow(2px 0 0 rgba(255,0,0,0.7)) drop-shadow(-2px 0 0 rgba(0,255,255,0.7))"
+                      // Apply extreme chromatic aberration manually for more control
+                      filter: "drop-shadow(4px 0 0 rgba(255,0,0,0.85)) drop-shadow(-4px 0 0 rgba(0,255,255,0.85)) drop-shadow(0 2px 0 rgba(0,255,0,0.6))"
                     }}
                   />
                 </LogoContainer>
