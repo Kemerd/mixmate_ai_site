@@ -305,7 +305,7 @@ const Features: React.FC = () => {
             >
                 <BackgroundEffectContainer variants={fadeUpVariant}>
                   <BackgroundSVG 
-                    src="/assets/images/squircle_rectangle.svg" 
+                    src={`${process.env.PUBLIC_URL}/assets/images/squircle_rectangle.svg`} 
                     alt=""
                     variants={fadeUpVariant}
                     animate={kickControls} // Apply kick animation controls
@@ -314,7 +314,7 @@ const Features: React.FC = () => {
 
                 <LogoContainer variants={fadeUpVariant}>
                   <Logo 
-                    src="/assets/logo/logo_text_green_white.svg" 
+                    src={`${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`} 
                     alt="MixMate AI Logo"
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
