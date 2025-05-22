@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
-import { useRhythmController, useKickAnimation, useSnareAnimation } from '../../hooks/useRhythm';
+import { useRhythmController, useKickAnimation, useSnareAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
 
 // Styled components for the features section
 const FeaturesSection = styled(motion.section)`
@@ -261,6 +261,39 @@ const Features: React.FC = () => {
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
     const kickControls = useKickAnimation(120, currentBeat); // Kick on every beat
     const snareControls = useSnareAnimation(120, currentBeat); // Snare on beats 1 & 3
+    
+    // Create subtle animations for each feature card with different offsets
+    // to create a ripple effect across the grid
+    const createCardAnimation = (index: number) => {
+        // Create different offsets based on card index for visual variety
+        const offset = (index % 3) * 0.33; // 0, 0.33, 0.66 offsets
+        
+        return createRhythmAnimation(
+            {
+                // Extremely subtle movement and shadow
+                y: -2,
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                transition: {
+                    duration: 0.2,
+                    ease: [0.33, 1, 0.68, 1], // Subtle easing
+                }
+            },
+            {
+                // Return to normal
+                y: 0,
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+                transition: {
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    duration: 0.4,
+                }
+            },
+            // Different timing based on card position
+            [(index % 2 === 0) ? 0 : 2], // Even cards on beat 0, odd cards on beat 2
+            120
+        )(currentBeat);
+    };
 
     return (
         <FeaturesSection id="features" ref={ref}>
@@ -314,6 +347,7 @@ const Features: React.FC = () => {
                         <FeatureCard
                             key={index}
                             variants={fadeUpVariant}
+                            animate={createCardAnimation(index)} // Apply subtle rhythm animation
                             whileHover={{
                                 y: -5,
                                 transition: {

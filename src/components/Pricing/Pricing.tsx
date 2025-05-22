@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
+import { useRhythmController, createRhythmAnimation } from '../../hooks/useRhythm';
 
 const PricingSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -160,14 +161,55 @@ const plans = [
 ];
 
 const Pricing: React.FC = () => {
-    const { ref, controls } = useInView();
+    const { ref, controls: inViewControls } = useInView();
+    const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
+    
+    // Create subtle animations for pricing cards
+    // Each with a different phase to create interesting visual harmony
+    const createPricingCardAnimation = (index: number, isPopular: boolean = false) => {
+        // More pronounced animation for the popular card, still subtle
+        const intensity = isPopular ? 1.5 : 1;
+        
+        return createRhythmAnimation(
+            {
+                // Very subtle movement, glow and scale
+                y: -3 * intensity,
+                scale: 1 + (0.005 * intensity),
+                boxShadow: isPopular 
+                    ? '0 8px 24px rgba(137, 255, 0, 0.3)'  // Accent color with opacity
+                    : '0 6px 16px rgba(0, 0, 0, 0.15)',
+                transition: {
+                    duration: 0.2,
+                    ease: [0.33, 1, 0.68, 1], // Subtle easing
+                }
+            },
+            {
+                // Return to normal
+                y: 0,
+                scale: 1,
+                boxShadow: isPopular 
+                    ? '0 4px 12px rgba(137, 255, 0, 0.2)' // Accent color with opacity
+                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                transition: {
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    duration: 0.4,
+                }
+            },
+            // Popular card pulses on beat 0, non-popular card on beat 2
+            // Creating a nice alternating effect
+            [isPopular ? 0 : 2],
+            120
+        )(currentBeat);
+    };
 
     return (
         <PricingSection id="pricing" ref={ref}>
             <Container
                 variants={staggerContainer}
                 initial="hidden"
-                animate={controls}
+                animate={inViewControls}
             >
                 <SectionTitle variants={fadeUpVariant}>
                     Revolutionary Tech, Not Revolutionary Pricing
@@ -179,6 +221,7 @@ const Pricing: React.FC = () => {
                             key={index}
                             variants={fadeUpVariant}
                             isPopular={plan.isPopular}
+                            animate={createPricingCardAnimation(index, plan.isPopular)} // Apply subtle rhythm animation
                             whileHover={{
                                 y: -10,
                                 transition: {
