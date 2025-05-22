@@ -1,36 +1,63 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAnimation, AnimationControls } from 'framer-motion';
 
+// Global state to ensure a single instance of the rhythm controller
+let globalBeat = 0;
+let globalInterval: NodeJS.Timeout | null = null;
+let observers: ((beat: number) => void)[] = [];
+
+// Initialize the global rhythm if it doesn't exist
+const initializeGlobalRhythm = (bpm: number) => {
+  if (globalInterval) return;
+  
+  const beatDuration = 60000 / bpm;
+  globalInterval = setInterval(() => {
+    globalBeat = (globalBeat + 1) % 4;
+    // Notify all observers of the beat change
+    observers.forEach(callback => callback(globalBeat));
+  }, beatDuration);
+};
+
+// Clean up the global rhythm if no observers
+const cleanupGlobalRhythm = () => {
+  if (observers.length === 0 && globalInterval) {
+    clearInterval(globalInterval);
+    globalInterval = null;
+  }
+};
+
 /**
  * Shared rhythm controller for synchronized animations
  * Creates a 4/4 time signature metronome at specified BPM
+ * Uses a singleton pattern to ensure perfect synchronization
  * 
  * @param bpm - Beats per minute (default: 120)
  * @returns Current beat position (0-3)
  */
 export const useRhythmController = (bpm = 120) => {
-  // Shared state for animation synchronization
-  const [beat, setBeat] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Local state that mirrors the global beat
+  const [beat, setBeat] = useState(globalBeat);
   
-  // Setup shared metronome
   useEffect(() => {
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
+    // Initialize global rhythm if not already running
+    initializeGlobalRhythm(bpm);
     
-    // Start a single shared interval for both animations
-    intervalRef.current = setInterval(() => {
-      setBeat(prevBeat => (prevBeat + 1) % 4); // 4/4 time signature (0,1,2,3)
-    }, beatDuration);
+    // Create observer function to update local state
+    const observer = (newBeat: number) => {
+      setBeat(newBeat);
+    };
     
-    // Clean up on unmount
+    // Register this component as an observer
+    observers.push(observer);
+    
+    // Clean up when component unmounts
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      observers = observers.filter(obs => obs !== observer);
+      cleanupGlobalRhythm();
     };
   }, [bpm]);
   
-  return beat; // Return current beat position (0,1,2,3)
+  return beat;
 };
 
 /**

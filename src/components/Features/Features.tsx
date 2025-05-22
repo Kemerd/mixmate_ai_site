@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
+import { useRhythmController, useKickAnimation, useSnareAnimation } from '../../hooks/useRhythm';
 
 // Styled components for the features section
 const FeaturesSection = styled(motion.section)`
@@ -175,122 +176,6 @@ const BackgroundEffectContainer = styled(motion.div)`
   padding-top: 0px; /* Position vertically at 290px from top */
   overflow: visible;
 `;
-
-// Shared timing controller for synchronized animations
-const useRhythmController = (bpm = 120) => {
-  // Shared state for animation synchronization
-  const [beat, setBeat] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Setup shared metronome
-  useEffect(() => {
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    
-    // Start a single shared interval for both animations
-    intervalRef.current = setInterval(() => {
-      setBeat(prevBeat => (prevBeat + 1) % 4); // 4/4 time signature (0,1,2,3)
-    }, beatDuration);
-    
-    // Clean up on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [bpm]);
-  
-  return beat; // Return current beat position (0,1,2,3)
-};
-
-// Updated kick animation hook that uses the shared rhythm
-const useKickAnimation = (bpm = 120, currentBeat: number): AnimationControls => {
-  const controls = useAnimation();
-  const prevBeatRef = useRef<number>(-1);
-  
-  // Use effect that reacts to beat changes
-  useEffect(() => {
-    // Only trigger animation when beat changes
-    if (prevBeatRef.current === currentBeat) return;
-    prevBeatRef.current = currentBeat;
-    
-    // Calculate timing
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    const kickDuration = 0.1 * beatDuration; // Quick expansion (50ms for 120 BPM)
-    
-    // Kick on every beat (0,1,2,3)
-    controls.start({
-      // Quick expansion
-      height: 1250,
-      y: -10, // Slight upward movement
-      transition: {
-        duration: kickDuration / 1000, // Convert to seconds
-        ease: [0.04, 0.62, 0.23, 0.98], // Custom easing for quick expansion
-      },
-    }).then(() => {
-      // Spring back
-      controls.start({
-        height: 1100,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 15,
-          duration: (beatDuration - kickDuration) / 1000, // Remaining time in the beat
-        },
-      });
-    });
-  }, [currentBeat, bpm, controls]);
-
-  return controls;
-};
-
-// Updated snare animation hook that uses the shared rhythm
-const useSnareAnimation = (bpm = 120, currentBeat: number): AnimationControls => {
-  const controls = useAnimation();
-  const prevBeatRef = useRef<number>(-1);
-  
-  // Use effect that reacts to beat changes
-  useEffect(() => {
-    // Only trigger animation when beat changes
-    if (prevBeatRef.current === currentBeat) return;
-    prevBeatRef.current = currentBeat;
-    
-    // Calculate timing
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    const snareDuration = 0.1 * beatDuration; // Same as kick duration (50ms for 120 BPM)
-    
-    // Snare only on beats 1 and 3 (second and fourth of each measure)
-    if (currentBeat === 1 || currentBeat === 3) {
-      // The snare animation sequence with more pronounced chromatic aberration
-      controls.start({
-        // Quick expansion with enhanced chromatic aberration
-        scale: 1.05,
-        filter: "brightness(1.2) contrast(1.1)",
-        // More pronounced RGB split
-        textShadow: "3px 0 0 rgba(255,0,0,0.85), -3px 0 0 rgba(0,255,255,0.85), 0 2px 0 rgba(0,255,0,0.6)",
-        transition: {
-          duration: snareDuration / 1000,
-          ease: [0.04, 0.62, 0.23, 0.98],
-        },
-      }).then(() => {
-        // Spring back
-        controls.start({
-          scale: 1,
-          filter: "brightness(1) contrast(1)",
-          textShadow: "0 0 0 rgba(0,0,0,0)",
-          transition: {
-            type: "spring",
-            stiffness: 300,
-            damping: 15,
-            duration: (beatDuration - snareDuration) / 1000,
-          },
-        });
-      });
-    }
-  }, [currentBeat, bpm, controls]);
-
-  return controls;
-};
 
 // Updated BackgroundSVG component with base height
 const BackgroundSVG = styled(motion.img)`

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, AnimationControls, useAnimation } from 'framer-motion';
 import styled from 'styled-components';
 import { slideInRight, bounceScale } from '../../animations/variants';
+import { useRhythmController, useLogoAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
 
 // Styled components for our header
 const HeaderContainer = styled(motion.header)`
@@ -27,11 +28,14 @@ const Logo = styled(motion.a)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
+  will-change: transform, filter; /* Performance optimization */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 
   img {
     height: 50px;
     width: auto;
-    /* No filter needed for the new logo */
+    transform-origin: center; /* For rotation around center */
   }
 `;
 
@@ -50,13 +54,14 @@ const NavLink = styled(motion.a)`
   font-size: ${({ theme }) => theme.typography.fontSize.base};
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
   transition: color 0.2s ease;
+  will-change: opacity, color, transform;
 
   &:hover {
     color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
-// Discord button styled component with Squircle shape (Apple-inspired)
+// Discord button styled component with more subtle animation
 const DiscordButton = styled(motion.a)`
   display: flex;
   align-items: center;
@@ -141,8 +146,46 @@ const DiscordSVG = () => (
   </svg>
 );
 
+// Custom hook for subtle sine-wave animation on nav links
+const useSineWaveAnimation = (bpm = 120, currentBeat: number, offset = 0): AnimationControls => {
+  const controls = useAnimation();
+  
+  // Calculate sine wave position (0-1) based on beat and optional offset
+  const sinePosition = Math.sin((currentBeat / 4 + offset) * Math.PI * 2) * 0.5 + 0.5;
+  
+  // Update animation on every beat or beat fraction
+  useEffect(() => {
+    // Subtle brightness and scale based on sine wave
+    controls.start({
+      opacity: 0.7 + (sinePosition * 0.3), // Subtle opacity change (0.7-1.0)
+      y: sinePosition * 2, // Subtle vertical movement (0-2px)
+      scale: 1 + (sinePosition * 0.02), // Subtle scale (1.0-1.02)
+      transition: {
+        duration: 0.5, // Half-beat duration for smooth sine wave
+        ease: [0.33, 1, 0.68, 1], // Sine-like easing
+      }
+    });
+  }, [currentBeat, sinePosition, controls]);
+  
+  return controls;
+};
+
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
+  const logoControls = useLogoAnimation(120, currentBeat); // Logo animation on beats 1 & 3
+  
+  // Get animation controls for each nav link with slight offsets for wave effect
+  const featuresControls = useSineWaveAnimation(120, currentBeat, 0);
+  const pricingControls = useSineWaveAnimation(120, currentBeat, 0.25);
+  const supportControls = useSineWaveAnimation(120, currentBeat, 0.5);
+  
+  // Array of nav items with their animation controls
+  const navItems = [
+    { name: 'Features', controls: featuresControls },
+    { name: 'Pricing', controls: pricingControls },
+    { name: 'Support', controls: supportControls },
+  ];
 
   return (
     <HeaderContainer
@@ -154,12 +197,18 @@ const Header: React.FC = () => {
         damping: 30,
       }}
     >
-      <Logo href="/" variants={bounceScale} whileHover="hover" whileTap="tap">
+      <Logo 
+        href="/" 
+        variants={bounceScale} 
+        whileHover="hover" 
+        whileTap="tap"
+        animate={logoControls} // Apply the rhythmic animation
+      >
         <img src="/logo192.png" alt="mixmate.ai Logo" />
       </Logo>
 
       <Nav>
-        {/* Discord Button with SVG */}
+        {/* Discord Button without rhythm animation */}
         <DiscordButton 
           href="https://discord.gg/ZEJ97uwSSX" 
           target="_blank" 
@@ -167,19 +216,22 @@ const Header: React.FC = () => {
           variants={bounceScale}
           whileHover="hover"
           whileTap="tap"
+          // No rhythm animation here
         >
           <DiscordSVG />
         </DiscordButton>
         
-        {['Features', 'Pricing', 'Support'].map((item) => (
+        {/* Navigation links with subtle sine wave animations */}
+        {navItems.map((item) => (
           <NavLink
-            key={item}
-            href={`#${item.toLowerCase()}`}
+            key={item.name}
+            href={`#${item.name.toLowerCase()}`}
             variants={bounceScale}
             whileHover="hover"
             whileTap="tap"
+            animate={item.controls} // Apply subtle sine wave animation
           >
-            {item}
+            {item.name}
           </NavLink>
         ))}
       </Nav>
@@ -212,16 +264,18 @@ const Header: React.FC = () => {
               <DiscordSVG />
             </MobileDiscordButton>
             
-            {['Features', 'Pricing', 'Support'].map((item) => (
+            {/* Navigation links with subtle sine wave animations */}
+            {navItems.map((item) => (
               <NavLink
-                key={item}
-                href={`#${item.toLowerCase()}`}
+                key={item.name}
+                href={`#${item.name.toLowerCase()}`}
                 onClick={() => setIsMobileMenuOpen(false)}
                 variants={bounceScale}
                 whileHover="hover"
                 whileTap="tap"
+                animate={item.controls} // Apply subtle sine wave animation
               >
-                {item}
+                {item.name}
               </NavLink>
             ))}
           </MobileMenu>
