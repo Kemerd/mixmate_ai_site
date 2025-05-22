@@ -18,10 +18,12 @@ const Container = styled(motion.div)`
 `;
 
 const LogoContainer = styled(motion.div)`
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
   max-width: 300px;
   width: 100%;
-  margin: 0 auto ${({ theme }) => theme.spacing.xl};
+  margin: 0 auto ${({ theme }) => theme.spacing.md};
+  position: relative;
+  z-index: 2;
 `;
 
 const Logo = styled(motion.img)`
@@ -33,7 +35,7 @@ const SectionTitle = styled(motion.h2)`
   font-size: ${({ theme }) => theme.typography.fontSize['4xl']};
   color: ${({ theme }) => theme.colors.text.primary};
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
   background: linear-gradient(
     135deg,
     ${({ theme }) => theme.colors.text.primary} 0%,
@@ -44,6 +46,8 @@ const SectionTitle = styled(motion.h2)`
   background-clip: text;
   color: transparent;
   background-size: 200% auto;
+  position: relative;
+  z-index: 2;
 `;
 
 const FeaturesGrid = styled(motion.div)`
@@ -51,6 +55,8 @@ const FeaturesGrid = styled(motion.div)`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: ${({ theme }) => theme.spacing.xl};
   margin-top: ${({ theme }) => theme.spacing['2xl']};
+  position: relative;
+  z-index: 2;
 `;
 
 const FeatureCard = styled(motion.div)`
@@ -127,6 +133,64 @@ const ComingSoonPill = styled(motion.div)`
   letter-spacing: 0.5px;
 `;
 
+// Container for the background visual effect
+const BackgroundEffectContainer = styled(motion.div)`
+  position: absolute;
+  top: -25px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 0px; /* Position vertically at 290px from top */
+  overflow: visible;
+`;
+
+const BackgroundSVG = styled(motion.img)`
+  max-width: 1500px; 
+  height: 1250px;
+  opacity: 0.8;
+  position: relative;
+  /* Add a slight transform to extend even wider */
+  transform: scale(1.2);
+  transform-origin: center top;
+`;
+
+const GeneralSubtleTextContainer = styled(motion.div)`
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.lg};
+`;
+
+const TopSpecificSubtleTextContainer = styled(GeneralSubtleTextContainer)`
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`;
+
+const BottomSpecificSubtleTextContainer = styled(GeneralSubtleTextContainer)`
+  margin-top: ${({ theme }) => theme.spacing['2xl']};
+  max-width: 550px;
+`;
+
+const SubtleText = styled(motion.p)`
+  font-size: ${({ theme }) => theme.typography.fontSize.base};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  line-height: 1.6;
+  font-weight: ${({ theme }) => theme.typography.fontWeight.normal};
+  opacity: 0.9;
+  letter-spacing: 0.2px;
+  text-align: center;
+  margin-bottom: 0;
+`;
+
 const features = [
     {
         icon: '🎛️',
@@ -175,10 +239,17 @@ const Features: React.FC = () => {
                 variants={staggerContainer}
                 initial="hidden"
                 animate={controls}
+                style={{ position: 'relative' }}
             >
-                <LogoContainer
-                  variants={fadeUpVariant}
-                >
+                <BackgroundEffectContainer variants={fadeUpVariant}>
+                  <BackgroundSVG 
+                    src="/assets/images/squircle_rectangle.svg" 
+                    alt=""
+                    variants={fadeUpVariant}
+                  />
+                </BackgroundEffectContainer>
+
+                <LogoContainer variants={fadeUpVariant}>
                   <Logo 
                     src="/assets/logo/logo_text_green_white.svg" 
                     alt="MixMate AI Logo"
@@ -190,6 +261,18 @@ const Features: React.FC = () => {
                 <SectionTitle variants={fadeUpVariant}>
                     Your Expert AI Mixing Assistant
                 </SectionTitle>
+                
+                <TopSpecificSubtleTextContainer
+                    variants={fadeUpVariant}
+                >
+                    <SubtleText
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 0.9, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+                    >
+                        No more generic "make it sound better" tools. MixMate AI understands what you're trying to achieve and helps you get there faster.
+                    </SubtleText>
+                </TopSpecificSubtleTextContainer>
 
                 <FeaturesGrid>
                     {features.map((feature, index) => (
@@ -241,6 +324,18 @@ const Features: React.FC = () => {
                         </FeatureCard>
                     ))}
                 </FeaturesGrid>
+                
+                <BottomSpecificSubtleTextContainer
+                    variants={fadeUpVariant}
+                >
+                    <SubtleText
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 0.9, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+                    >
+                        You'll also pick up actual production techniques that no $2,000 masterclass would teach you—because MixMate explains its reasoning instead of just name-dropping famous clients.
+                    </SubtleText>
+                </BottomSpecificSubtleTextContainer>
             </Container>
         </FeaturesSection>
     );
