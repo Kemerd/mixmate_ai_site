@@ -5,19 +5,19 @@ import { slideInRight, bounceScale } from '../../animations/variants';
 import { useRhythmController, useLogoAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
 
 // Styled components for our header
-const HeaderContainer = styled(motion.header)<{ $isMenuOpen?: boolean }>`
+const HeaderContainer = styled(motion.header)<{ $isMenuOpen?: boolean; $isAnimating?: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   width: 100vw; /* Use viewport width to ensure no overflow */
-  height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+  height: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? '50vh' : '80px'};
   min-height: 80px;
-  max-height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+  max-height: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? '50vh' : '80px'};
   display: flex;
-  flex-direction: ${({ $isMenuOpen }) => $isMenuOpen ? 'column' : 'row'};
+  flex-direction: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? 'column' : 'row'};
   align-items: center;
-  justify-content: ${({ $isMenuOpen }) => $isMenuOpen ? 'flex-start' : 'space-between'};
+  justify-content: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? 'flex-start' : 'space-between'};
   padding: 0 ${({ theme }) => theme.spacing.xl};
   background: ${({ theme }) => `linear-gradient(
     to bottom,
@@ -28,11 +28,24 @@ const HeaderContainer = styled(motion.header)<{ $isMenuOpen?: boolean }>`
   z-index: 1000;
   overflow: hidden; /* Completely hide all scrollbars */
   
+  /* Smooth transitions for layout changes */
+  transition: height 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              flex-direction 0.3s ease,
+              justify-content 0.3s ease;
+  
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    padding-bottom: ${({ $isMenuOpen, theme }) => $isMenuOpen ? theme.spacing.xl : '0'};
-    height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
-    max-height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+    padding-bottom: ${({ $isMenuOpen, $isAnimating, theme }) => ($isMenuOpen || $isAnimating) ? theme.spacing.xl : '0'};
+    height: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? '50vh' : '80px'};
+    max-height: ${({ $isMenuOpen, $isAnimating }) => ($isMenuOpen || $isAnimating) ? '50vh' : '80px'};
     overflow: hidden; /* No scrollbars on mobile either */
+    
+    /* Mobile-specific transitions */
+    transition: height 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                padding-bottom 0.3s ease,
+                flex-direction 0.3s ease,
+                justify-content 0.3s ease;
   }
 `;
 
@@ -271,6 +284,7 @@ const useSineWaveAnimation = (bpm = 120, currentBeat: number, offset = 0): Anima
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuAnimating, setIsMenuAnimating] = useState(false); // Track animation state
   const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
   const logoControls = useLogoAnimation(120, currentBeat); // Logo animation on beats 1 & 3
   
@@ -290,6 +304,22 @@ const Header: React.FC = () => {
       document.body.style.paddingRight = '';
     };
   }, [isMobileMenuOpen]);
+
+  // Handle menu toggle with animation tracking
+  const handleMenuToggle = () => {
+    if (isMobileMenuOpen) {
+      setIsMenuAnimating(true); // Start tracking animation
+      setIsMobileMenuOpen(false);
+    } else {
+      setIsMobileMenuOpen(true);
+      setIsMenuAnimating(false);
+    }
+  };
+
+  // Handle exit animation complete
+  const handleExitComplete = () => {
+    setIsMenuAnimating(false); // Exit animation finished, safe to change layout
+  };
   
   // Get animation controls for each nav link with slight offsets for wave effect
   const featuresControls = useSineWaveAnimation(120, currentBeat, 0);
@@ -306,6 +336,7 @@ const Header: React.FC = () => {
   return (
     <HeaderContainer
       $isMenuOpen={isMobileMenuOpen}
+      $isAnimating={isMenuAnimating}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{
@@ -355,7 +386,7 @@ const Header: React.FC = () => {
         </Nav>
 
         <MobileMenuButton
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onClick={handleMenuToggle}
           variants={bounceScale}
           whileTap="tap"
         >
@@ -363,7 +394,7 @@ const Header: React.FC = () => {
         </MobileMenuButton>
       </HeaderTopRow>
 
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={handleExitComplete}>
         {isMobileMenuOpen && (
           <MobileMenu
             variants={slideInRight}
@@ -388,7 +419,7 @@ const Header: React.FC = () => {
               <MobileNavLink
                 key={item.name}
                 href={`#${item.name.toLowerCase()}`}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={handleMenuToggle}
                 variants={bounceScale}
                 whileHover="hover"
                 whileTap="tap"
