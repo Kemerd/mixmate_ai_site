@@ -27,7 +27,9 @@ const ModalContent = styled(motion.div)`
   position: relative;
 `;
 
-const CloseButton = styled(motion.button)`
+const CloseButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap'].includes(prop),
+})`
   position: absolute;
   top: ${({ theme }) => theme.spacing.md};
   right: ${({ theme }) => theme.spacing.md};

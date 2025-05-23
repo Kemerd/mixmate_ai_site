@@ -60,7 +60,9 @@ const Label = styled(motion.label)`
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
 `;
 
-const Input = styled(motion.input)`
+const Input = styled(motion.input).withConfig({
+  shouldForwardProp: (prop) => !['whileFocus', 'animate', 'transition'].includes(prop),
+})`
   width: 100%;
   padding: ${({ theme }) => theme.spacing.md};
   background: ${({ theme }) => theme.colors.background.secondary};
@@ -77,12 +79,16 @@ const Input = styled(motion.input)`
   }
 `;
 
-const TextArea = styled(Input).attrs({ as: 'textarea' })`
+const TextArea = styled(Input).withConfig({
+  shouldForwardProp: (prop) => !['whileFocus', 'animate', 'transition'].includes(prop),
+}).attrs({ as: 'textarea' })`
   min-height: 150px;
   resize: vertical;
 `;
 
-const SubmitButton = styled(motion.button)`
+const SubmitButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
+})`
   width: 100%;
   padding: ${({ theme }) => theme.spacing.md};
   background: ${({ theme }) => theme.colors.accent};
@@ -105,7 +111,9 @@ const FAQItem = styled(motion.div)`
   overflow: hidden;
 `;
 
-const FAQQuestion = styled(motion.button)`
+const FAQQuestion = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
+})`
   width: 100%;
   padding: ${({ theme }) => theme.spacing.lg};
   display: flex;

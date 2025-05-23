@@ -45,9 +45,11 @@ const PricingGrid = styled(motion.div)`
   }
 `;
 
-const PricingCard = styled(motion.div) <{ isPopular?: boolean }>`
-  background: ${({ theme, isPopular }) =>
-        isPopular
+const PricingCard = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileFocus', 'animate', 'isPopular'].includes(prop),
+})<{ $isPopular?: boolean }>`
+  background: ${({ theme, $isPopular }) =>
+        $isPopular
             ? `linear-gradient(135deg, 
           ${theme.colors.accent}15 0%,
           ${theme.colors.background.secondary} 100%)`
@@ -56,12 +58,14 @@ const PricingCard = styled(motion.div) <{ isPopular?: boolean }>`
   padding: ${({ theme }) => theme.spacing.xl};
   position: relative;
   overflow: hidden;
-  border: 1px solid ${({ theme, isPopular }) =>
-        isPopular ? theme.colors.accent : 'rgba(255, 255, 255, 0.1)'};
+  border: 1px solid ${({ theme, $isPopular }) =>
+        $isPopular ? theme.colors.accent : 'rgba(255, 255, 255, 0.1)'};
   backdrop-filter: blur(10px);
 `;
 
-const PopularBadge = styled(motion.span)`
+const PopularBadge = styled(motion.span).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop),
+})`
   position: absolute;
   top: ${({ theme }) => theme.spacing.md};
   right: ${({ theme }) => theme.spacing.md};
@@ -114,15 +118,17 @@ const Feature = styled(motion.li)`
   }
 `;
 
-const CTAButton = styled(motion.button) <{ isPopular?: boolean }>`
+const CTAButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants', 'isPopular'].includes(prop),
+})<{ $isPopular?: boolean }>`
   width: 100%;
   padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.xl}`};
-  background: ${({ theme, isPopular }) =>
-        isPopular ? theme.colors.accent : 'transparent'};
+  background: ${({ theme, $isPopular }) =>
+        $isPopular ? theme.colors.accent : 'transparent'};
   border: 2px solid ${({ theme }) => theme.colors.accent};
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  color: ${({ theme, isPopular }) =>
-        isPopular ? theme.colors.text.primary : theme.colors.accent};
+  color: ${({ theme, $isPopular }) =>
+        $isPopular ? theme.colors.text.primary : theme.colors.accent};
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   transition: all 0.2s ease;
 
@@ -228,7 +234,7 @@ const MemoizedPricingCard = React.memo<{
     return (
         <PricingCard
             variants={fadeUpVariant}
-            isPopular={plan.isPopular}
+            $isPopular={plan.isPopular}
             animate={cardAnimation}
             whileHover={hoverAnimation}
         >
@@ -262,7 +268,7 @@ const MemoizedPricingCard = React.memo<{
             </FeatureList>
 
             <CTAButton
-                isPopular={plan.isPopular}
+                $isPopular={plan.isPopular}
                 variants={bounceScale}
                 whileHover="hover"
                 whileTap="tap"
