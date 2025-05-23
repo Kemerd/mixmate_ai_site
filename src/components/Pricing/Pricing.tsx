@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
@@ -31,6 +31,79 @@ const SectionTitle = styled(motion.h2)`
   background-clip: text;
   color: transparent;
   background-size: 200% auto;
+`;
+
+const BillingToggle = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: 0px;
+  padding: ${({ theme }) => theme.spacing.xs};
+  background: ${({ theme }) => theme.colors.background.secondary}80;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  width: fit-content;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      ${({ theme }) => theme.colors.accent}05 0%,
+      transparent 50%,
+      ${({ theme }) => theme.colors.accent}03 100%
+    );
+    pointer-events: none;
+  }
+`;
+
+const ToggleButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['isActive'].includes(prop),
+})<{ isActive: boolean }>`
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
+  background: ${({ theme, isActive }) =>
+    isActive 
+      ? `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accent}DD 100%)`
+      : 'transparent'};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.colors.background.primary : theme.colors.text.secondary};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  min-width: 80px;
+  
+  &:hover {
+    background: ${({ theme, isActive }) =>
+      isActive 
+        ? `linear-gradient(135deg, ${theme.colors.accent} 0%, ${theme.colors.accent}EE 100%)`
+        : `${theme.colors.accent}10`};
+    color: ${({ theme, isActive }) =>
+      isActive ? theme.colors.background.primary : theme.colors.accent};
+  }
+`;
+
+const ToggleLabel = styled.span`
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  color: ${({ theme }) => theme.colors.text.secondary}CC;
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+  margin-top: ${({ theme }) => theme.spacing['2xl']};
+  text-align: center;
+  font-weight: ${({ theme }) => theme.typography.fontWeight.normal};
+  opacity: 0.7;
 `;
 
 const PricingGrid = styled(motion.div)`
@@ -68,7 +141,7 @@ const PopularBadge = styled(motion.span)`
   top: ${({ theme }) => theme.spacing.md};
   right: ${({ theme }) => theme.spacing.md};
   background: ${({ theme }) => theme.colors.accent};
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.background.primary};
   padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
@@ -101,19 +174,34 @@ const FeatureList = styled(motion.ul)`
   margin-bottom: ${({ theme }) => theme.spacing.xl};
 `;
 
-const Feature = styled(motion.li)`
+const Feature = styled(motion.li).withConfig({
+  shouldForwardProp: (prop) => !['isComingSoon'].includes(prop),
+})<{ isComingSoon?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
+  color: ${({ theme, isComingSoon }) => 
+    isComingSoon ? theme.colors.text.secondary + '80' : theme.colors.text.secondary};
   margin-bottom: ${({ theme }) => theme.spacing.md};
   font-size: ${({ theme }) => theme.typography.fontSize.base};
+  position: relative;
 
   &::before {
     content: '✓';
-    color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme, isComingSoon }) => 
+      isComingSoon ? theme.colors.text.secondary + '60' : theme.colors.accent};
     font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
   }
+`;
+
+const ComingSoonBadge = styled.span`
+  background: ${({ theme }) => theme.colors.accent}40;
+  color: ${({ theme }) => theme.colors.accent};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  font-size: ${({ theme }) => theme.typography.fontSize.xs};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  margin-left: auto;
 `;
 
 const CTAButton = styled(motion.button).withConfig({
@@ -126,51 +214,50 @@ const CTAButton = styled(motion.button).withConfig({
   border: 2px solid ${({ theme }) => theme.colors.accent};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   color: ${({ theme, isPopular }) =>
-        isPopular ? theme.colors.text.primary : theme.colors.accent};
+        isPopular ? theme.colors.background.primary : theme.colors.accent};
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   transition: all 0.2s ease;
 
   &:hover {
     background: ${({ theme }) => theme.colors.accent};
-    color: ${({ theme }) => theme.colors.text.primary};
+    color: ${({ theme }) => theme.colors.background.primary};
   }
 `;
 
-// Move static data outside component to prevent recreation on every render
-const PRICING_PLANS = [
-    {
-        name: 'Indie Producer',
-        price: '$9.99',
-        period: '/month',
-        features: [
-            'Full DAW Integration',
-            'Real-time Mixing Suggestions',
-            '10-second Context Window',
-            'CPU Processing',
-            '500 MixMoves Per Month',
-        ],
-    },
-    {
-        name: 'Production Studio',
-        price: '$99.99',
-        period: '/month',
-        isPopular: true,
-        features: [
-            'Everything in Indie Producer, PLUS:',
-            'GPU Acceleration (10-30x Faster)',
-            '30-second Context Window',
-            'Priority Processing',
-            '5000 MixMoves Per Month',
-        ],
-    },
+// Static pricing data with the new structure
+const INDIE_FEATURES = [
+  'Ableton Live integration',
+  'Real-time mixing suggestions',
+  '1,000 MixMoves for AI analysis',
+  'Fast AI models',
+  'Our pity for your financial situation',
+  '#s 10-second live audio analysis',
+  '#s CPU processing',
+];
+
+const PRO_FEATURES = [
+  'Ableton Live integration',
+  'Real-time mixing suggestions',
+  '10,000 MixMoves for AI analysis',
+  'Advanced AI models with priority processing',
+  'Our undying love and support',
+  '#s 30-second live audio analysis',
+  '#s GPU processing',
 ];
 
 // Memoized PricingCard component to prevent unnecessary re-renders
 const MemoizedPricingCard = React.memo<{
-    plan: typeof PRICING_PLANS[0];
+    plan: {
+        name: string;
+        monthlyPrice: string;
+        yearlyPrice: string;
+        features: string[];
+        isPopular?: boolean;
+    };
     index: number;
     currentBeat: number;
-}>(({ plan, index, currentBeat }) => {
+    isYearly: boolean;
+}>(({ plan, index, currentBeat, isYearly }) => {
     // Use the new useRhythmAnimation hook directly
     const intensity = plan.isPopular ? 1.5 : 1;
     
@@ -246,23 +333,30 @@ const MemoizedPricingCard = React.memo<{
 
             <PlanName>{plan.name}</PlanName>
             <PlanPrice>
-                <span className="amount">{plan.price}</span>
-                <span className="period">{plan.period}</span>
+                <span className="amount">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
+                <span className="period">{isYearly ? '/year' : '/month'}</span>
             </PlanPrice>
 
             <FeatureList>
-                {plan.features.map((feature, featureIndex) => (
-                    <Feature
-                        key={featureIndex}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                            delay: 0.3 + featureIndex * 0.1,
-                        }}
-                    >
-                        {feature}
-                    </Feature>
-                ))}
+                {plan.features.map((feature, featureIndex) => {
+                    const isComingSoon = feature.startsWith('#s ');
+                    const displayFeature = isComingSoon ? feature.substring(3) : feature;
+                    
+                    return (
+                        <Feature
+                            key={featureIndex}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{
+                                delay: 0.3 + featureIndex * 0.1,
+                            }}
+                            isComingSoon={isComingSoon}
+                        >
+                            {displayFeature}
+                            {isComingSoon && <ComingSoonBadge>Coming Soon</ComingSoonBadge>}
+                        </Feature>
+                    );
+                })}
             </FeatureList>
 
             <CTAButton
@@ -282,6 +376,28 @@ MemoizedPricingCard.displayName = 'MemoizedPricingCard';
 const Pricing: React.FC = React.memo(() => {
     const { ref, controls: inViewControls } = useInView();
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
+    const [isYearly, setIsYearly] = useState(false);
+
+    // Define pricing plans with new structure
+    const pricingPlans = useMemo(() => [
+        {
+            name: 'Indie Producer',
+            monthlyPrice: '$9.99',
+            yearlyPrice: '$99.99',
+            features: INDIE_FEATURES,
+        },
+        {
+            name: 'Production Studio',
+            monthlyPrice: '$99.99',
+            yearlyPrice: '$999.99',
+            features: PRO_FEATURES,
+            isPopular: true,
+        },
+    ], []);
+
+    const handleToggleBilling = useCallback((yearly: boolean) => {
+        setIsYearly(yearly);
+    }, []);
 
     return (
         <PricingSection id="pricing" ref={ref}>
@@ -295,15 +411,43 @@ const Pricing: React.FC = React.memo(() => {
                 </SectionTitle>
 
                 <PricingGrid>
-                    {PRICING_PLANS.map((plan, index) => (
+                    {pricingPlans.map((plan, index) => (
                         <MemoizedPricingCard
                             key={`${plan.name}-${index}`}
                             plan={plan}
                             index={index}
                             currentBeat={currentBeat}
+                            isYearly={isYearly}
                         />
                     ))}
                 </PricingGrid>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.6 }}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                >
+                    <ToggleLabel>Choose your billing cycle</ToggleLabel>
+                    <BillingToggle>
+                        <ToggleButton
+                            isActive={!isYearly}
+                            onClick={() => handleToggleBilling(false)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Monthly
+                        </ToggleButton>
+                        <ToggleButton
+                            isActive={isYearly}
+                            onClick={() => handleToggleBilling(true)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Yearly
+                        </ToggleButton>
+                    </BillingToggle>
+                </motion.div>
             </Container>
         </PricingSection>
     );
