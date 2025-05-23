@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 
 // Move static data outside component to prevent recreation on every render
 const WINDOWS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`;
 const MACOS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/macos.svg`;
-const DAW_INTERFACE_PATH = `${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`;
+const DAW_INTERFACE_PREVIEW_IMAGE = `${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`;
 
 // Memoize static animation variants to prevent recreation
 const memoizedMacOsButtonVariants = {
@@ -116,7 +116,7 @@ const CTAContainer = styled(motion.div)`
   display: flex;
   gap: ${({ theme }) => theme.spacing.lg};
   justify-content: center;
-  margin-bottom: ${({ theme }) => theme.spacing['3xl']};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
     flex-direction: column;
@@ -188,34 +188,63 @@ const ComingSoonBadge = styled.span`
   transition: opacity 0.2s ease-out;
 `;
 
-const DAWInterfaceContainer = styled(motion.div)`
-  max-width: 800px;
+// New Styled Components for Carousel
+const CarouselOuterContainer = styled(motion.div)`
   width: 100%;
   margin: 0 auto;
   position: relative;
-
+  padding-top: 0;
+  padding-bottom: ${({ theme }) => theme.spacing['3xl']};
   &::after {
     content: '';
     position: absolute;
-    bottom: -20%;
+    bottom: -5%;
     left: 0;
     right: 0;
-    height: 40%;
+    height: 60%;
     background: radial-gradient(
       ellipse at center,
-      ${({ theme }) => `${theme.colors.accent}15`} 0%,
+      ${({ theme }) => `${theme.colors.accent}1A`} 0%,
       transparent 70%
     );
-    z-index: -1;
-    filter: blur(20px);
+    z-index: 0;
+    filter: blur(30px);
+    pointer-events: none;
   }
 `;
 
-const DAWInterfaceImage = styled(motion.img)`
+const CarouselInnerContainer = styled(motion.div)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 800px;
+  perspective: 1500px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 0;
+`;
+
+const CardWrapper = styled(motion.div)`
+  position: absolute;
+  width: clamp(400px, 80%, 720px);
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter, box-shadow, z-index;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const CardImage = styled(motion.img)`
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   border-radius: ${({ theme }) => theme.borderRadius.xl};
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  user-select: none;
+  filter: drop-shadow(0 8px 15px rgba(0,0,0,0.15));
+  will-change: filter;
 `;
 
 const Hero: React.FC = React.memo(() => {
@@ -311,6 +340,35 @@ const Hero: React.FC = React.memo(() => {
     filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
   }), []);
 
+  // State for the active card in the carousel
+  const [activeIndex, setActiveIndex] = useState(1);
+
+  // Data for the carousel cards
+  const cardData = useMemo(() => [
+    { id: 0, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Left" },
+    { id: 1, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Center" },
+    { id: 2, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Right" },
+  ], []);
+
+  // Spring transition configuration for smooth card animations
+  const springTransition = useMemo(() => ({
+    type: "spring",
+    stiffness: 220,
+    damping: 28,
+    mass: 0.7
+  }), []);
+  
+  // Animation for the entire carousel group
+  const carouselGroupAnimation = useMemo(() => ({
+    y: [5, -5, 5],
+    transition: {
+      duration: 8,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
+      ease: "easeInOut",
+    }
+  }), []);
+
   return (
     <HeroSection
       variants={staggerContainer}
@@ -371,16 +429,97 @@ const Hero: React.FC = React.memo(() => {
           </DownloadButton>
         </CTAContainer>
 
-        <DAWInterfaceContainer
+        {/* Carousel Implementation */}
+        <CarouselOuterContainer 
           variants={fadeUpVariant}
+          initial="hidden"
+          animate="visible"
         >
-          <DAWInterfaceImage
-            src={DAW_INTERFACE_PATH}
-            alt="MixMate AI Application Interface"
-            {...dawInterfaceAnimation}
-            style={dawImageStyle}
-          />
-        </DAWInterfaceContainer>
+          <motion.div
+            animate={carouselGroupAnimation}
+          >
+            <CarouselInnerContainer>
+              <AnimatePresence initial={false}>
+                {cardData.map((card, index) => {
+                  const offset = index - activeIndex;
+                  const isCenter = offset === 0;
+                  
+                  let animateState = {};
+                  let zIndex = 0;
+
+                  if (isCenter) {
+                    animateState = {
+                      x: '0%',
+                      scale: 1,
+                      rotateY: 0,
+                      opacity: 1,
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+                    };
+                    zIndex = 3;
+                  } else if (offset === -1) {
+                    animateState = {
+                      x: '-65%',
+                      scale: 0.72,
+                      rotateY: 40,
+                      opacity: 0.6,
+                      boxShadow: '0 15px 30px -10px rgba(0, 0, 0, 0.35)',
+                    };
+                    zIndex = 2;
+                  } else if (offset === 1) {
+                    animateState = {
+                      x: '65%',
+                      scale: 0.72,
+                      rotateY: -40,
+                      opacity: 0.6,
+                      boxShadow: '0 15px 30px -10px rgba(0, 0, 0, 0.35)',
+                    };
+                    zIndex = 2;
+                  } else {
+                    animateState = {
+                      x: offset < 0 ? '-120%' : '120%',
+                      scale: 0.5,
+                      rotateY: offset < 0 ? 60 : -60,
+                      opacity: 0,
+                      boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+                    };
+                    zIndex = 1;
+                  }
+                  
+                  const cardHoverEffect = {
+                    y: isCenter ? -8 : -12,
+                    scale: isCenter ? 1.03 : 0.78,
+                    filter: 'brightness(110%)',
+                    boxShadow: isCenter 
+                      ? '0 30px 60px -15px rgba(0, 0, 0, 0.5)' 
+                      : '0 20px 40px -10px rgba(0, 0, 0, 0.4)',
+                  };
+
+                  return (
+                    <CardWrapper
+                      key={card.id}
+                      initial={{ 
+                        opacity: 0, 
+                        scale: 0.5, 
+                        x: index === 1 ? "0%" : (index < 1 ? "-100%" : "100%"),
+                        rotateY: index === 1 ? 0 : (index < 1 ? 45 : -45)
+                      }}
+                      animate={{ ...animateState, zIndex }}
+                      transition={springTransition}
+                      exit={{ opacity: 0, scale: 0.3, transition: { duration: 0.2 } }}
+                      onClick={() => setActiveIndex(index)}
+                      whileHover={cardHoverEffect}
+                    >
+                      <CardImage
+                        src={card.src}
+                        alt={card.alt}
+                      />
+                    </CardWrapper>
+                  );
+                })}
+              </AnimatePresence>
+            </CarouselInnerContainer>
+          </motion.div>
+        </CarouselOuterContainer>
       </HeroContent>
     </HeroSection>
   );
