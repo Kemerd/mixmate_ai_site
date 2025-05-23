@@ -5,15 +5,19 @@ import { slideInRight, bounceScale } from '../../animations/variants';
 import { useRhythmController, useLogoAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
 
 // Styled components for our header
-const HeaderContainer = styled(motion.header)`
+const HeaderContainer = styled(motion.header)<{ $isMenuOpen?: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  width: 100vw; /* Use viewport width to ensure no overflow */
+  height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+  min-height: 80px;
+  max-height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
   display: flex;
+  flex-direction: ${({ $isMenuOpen }) => $isMenuOpen ? 'column' : 'row'};
   align-items: center;
-  justify-content: space-between;
+  justify-content: ${({ $isMenuOpen }) => $isMenuOpen ? 'flex-start' : 'space-between'};
   padding: 0 ${({ theme }) => theme.spacing.xl};
   background: ${({ theme }) => `linear-gradient(
     to bottom,
@@ -22,6 +26,23 @@ const HeaderContainer = styled(motion.header)`
   )`};
   backdrop-filter: blur(10px);
   z-index: 1000;
+  overflow: hidden; /* Completely hide all scrollbars */
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    padding-bottom: ${({ $isMenuOpen, theme }) => $isMenuOpen ? theme.spacing.xl : '0'};
+    height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+    max-height: ${({ $isMenuOpen }) => $isMenuOpen ? '50vh' : '80px'};
+    overflow: hidden; /* No scrollbars on mobile either */
+  }
+`;
+
+// Add a top row container for mobile
+const HeaderTopRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 80px;
 `;
 
 const Logo = styled(motion.a)`
@@ -94,7 +115,7 @@ const DiscordButton = styled(motion.a)`
 `;
 
 // Mobile version of the Discord button
-const MobileDiscordButton = styled(NavLink)`
+const MobileDiscordButton = styled(motion.a)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,8 +123,17 @@ const MobileDiscordButton = styled(NavLink)`
   width: 140px;
   height: 40px;
   border-radius: 14px;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
   overflow: hidden;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #4752c4;
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.5);
+  }
   
   svg {
     width: 100%;
@@ -114,28 +144,97 @@ const MobileDiscordButton = styled(NavLink)`
 
 const MobileMenuButton = styled(motion.button)`
   display: none;
+  background: none;
+  border: none;
   color: ${({ theme }) => theme.colors.text.primary};
-  font-size: ${({ theme }) => theme.typography.fontSize['2xl']};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    display: block;
-  }
-`;
-
-const MobileMenu = styled(motion.div)`
-  display: none;
-  position: fixed;
-  top: 80px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: ${({ theme }) => theme.colors.background.primary};
-  padding: ${({ theme }) => theme.spacing.xl};
+  cursor: pointer;
+  padding: ${({ theme }) => theme.spacing.sm};
+  width: 40px;
+  height: 40px;
+  position: relative;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.spacing.xl};
+  }
+`;
+
+// Animated hamburger lines
+const HamburgerLine = styled(motion.div)`
+  width: 24px;
+  height: 2px;
+  background-color: ${({ theme }) => theme.colors.text.primary};
+  position: absolute;
+  right: 0; /* Position from right instead of centering */
+  transform-origin: center;
+`;
+
+// Hamburger menu component
+const AnimatedHamburger: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
+  return (
+    <>
+      <HamburgerLine
+        animate={{
+          rotate: isOpen ? 45 : 0,
+          y: isOpen ? 0 : -6,
+        }}
+        transition={{
+          duration: 0.3,
+          ease: [0.23, 1, 0.32, 1],
+        }}
+      />
+      <HamburgerLine
+        animate={{
+          opacity: isOpen ? 0 : 1,
+        }}
+        transition={{
+          duration: 0.3,
+          ease: [0.23, 1, 0.32, 1],
+        }}
+      />
+      <HamburgerLine
+        animate={{
+          rotate: isOpen ? -45 : 0,
+          y: isOpen ? 0 : 6,
+        }}
+        transition={{
+          duration: 0.3,
+          ease: [0.23, 1, 0.32, 1],
+        }}
+      />
+    </>
+  );
+};
+
+const MobileMenu = styled(motion.div)`
+  display: none;
+  width: 100%;
+  max-width: 100vw; /* Prevent any overflow */
+  height: calc(50vh - 80px); /* Fixed height minus header top row */
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align content to top */
+  gap: ${({ theme }) => theme.spacing.lg};
+  padding-top: ${({ theme }) => theme.spacing.lg};
+  overflow: hidden; /* No scrollbars in mobile menu */
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+  }
+`;
+
+// Mobile nav link styling
+const MobileNavLink = styled(motion.a)`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: ${({ theme }) => theme.typography.fontSize.lg};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: ${({ theme }) => theme.spacing.sm} 0;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
@@ -175,6 +274,23 @@ const Header: React.FC = () => {
   const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
   const logoControls = useLogoAnimation(120, currentBeat); // Logo animation on beats 1 & 3
   
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '0px'; // Prevent layout shift from scrollbar
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isMobileMenuOpen]);
+  
   // Get animation controls for each nav link with slight offsets for wave effect
   const featuresControls = useSineWaveAnimation(120, currentBeat, 0);
   const pricingControls = useSineWaveAnimation(120, currentBeat, 0.25);
@@ -189,6 +305,7 @@ const Header: React.FC = () => {
 
   return (
     <HeaderContainer
+      $isMenuOpen={isMobileMenuOpen}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{
@@ -197,52 +314,54 @@ const Header: React.FC = () => {
         damping: 30,
       }}
     >
-      <Logo 
-        href="/" 
-        variants={bounceScale} 
-        whileHover="hover" 
-        whileTap="tap"
-        animate={logoControls} // Apply the rhythmic animation
-      >
-        <img src={`${process.env.PUBLIC_URL}/logo192.png`} alt="mixmate.ai Logo" />
-      </Logo>
-
-      <Nav>
-        {/* Discord Button without rhythm animation */}
-        <DiscordButton 
-          href="https://discord.gg/ZEJ97uwSSX" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          variants={bounceScale}
-          whileHover="hover"
+      <HeaderTopRow>
+        <Logo 
+          href="/" 
+          variants={bounceScale} 
+          whileHover="hover" 
           whileTap="tap"
-          // No rhythm animation here
+          animate={logoControls} // Apply the rhythmic animation
         >
-          <DiscordSVG />
-        </DiscordButton>
-        
-        {/* Navigation links with subtle sine wave animations */}
-        {navItems.map((item) => (
-          <NavLink
-            key={item.name}
-            href={`#${item.name.toLowerCase()}`}
+          <img src={`${process.env.PUBLIC_URL}/logo192.png`} alt="mixmate.ai Logo" />
+        </Logo>
+
+        <Nav>
+          {/* Discord Button without rhythm animation */}
+          <DiscordButton 
+            href="https://discord.gg/ZEJ97uwSSX" 
+            target="_blank" 
+            rel="noopener noreferrer"
             variants={bounceScale}
             whileHover="hover"
             whileTap="tap"
-            animate={item.controls} // Apply subtle sine wave animation
+            // No rhythm animation here
           >
-            {item.name}
-          </NavLink>
-        ))}
-      </Nav>
+            <DiscordSVG />
+          </DiscordButton>
+          
+          {/* Navigation links with subtle sine wave animations */}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              href={`#${item.name.toLowerCase()}`}
+              variants={bounceScale}
+              whileHover="hover"
+              whileTap="tap"
+              animate={item.controls} // Apply subtle sine wave animation
+            >
+              {item.name}
+            </NavLink>
+          ))}
+        </Nav>
 
-      <MobileMenuButton
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        variants={bounceScale}
-        whileTap="tap"
-      >
-        {isMobileMenuOpen ? '×' : '☰'}
-      </MobileMenuButton>
+        <MobileMenuButton
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          variants={bounceScale}
+          whileTap="tap"
+        >
+          <AnimatedHamburger isOpen={isMobileMenuOpen} />
+        </MobileMenuButton>
+      </HeaderTopRow>
 
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -252,9 +371,9 @@ const Header: React.FC = () => {
             animate="visible"
             exit="hidden"
           >
-            {/* Add Discord button to mobile menu too */}
+            {/* Add Discord button to mobile menu */}
             <MobileDiscordButton
-              href="https://discord.gg/mixmate"
+              href="https://discord.gg/ZEJ97uwSSX"
               target="_blank"
               rel="noopener noreferrer"
               variants={bounceScale}
@@ -264,9 +383,9 @@ const Header: React.FC = () => {
               <DiscordSVG />
             </MobileDiscordButton>
             
-            {/* Navigation links with subtle sine wave animations */}
+            {/* Navigation links */}
             {navItems.map((item) => (
-              <NavLink
+              <MobileNavLink
                 key={item.name}
                 href={`#${item.name.toLowerCase()}`}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -276,7 +395,7 @@ const Header: React.FC = () => {
                 animate={item.controls} // Apply subtle sine wave animation
               >
                 {item.name}
-              </NavLink>
+              </MobileNavLink>
             ))}
           </MobileMenu>
         )}
