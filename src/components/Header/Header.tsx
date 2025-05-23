@@ -58,9 +58,7 @@ const HeaderTopRow = styled.div`
   height: 80px;
 `;
 
-const Logo = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants', 'animate'].includes(prop),
-})`
+const Logo = styled(motion.a)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
@@ -85,9 +83,7 @@ const Nav = styled(motion.nav)`
   }
 `;
 
-const NavLink = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants', 'animate'].includes(prop),
-})`
+const NavLink = styled(motion.a)`
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.typography.fontSize.base};
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
@@ -100,9 +96,7 @@ const NavLink = styled(motion.a).withConfig({
 `;
 
 // Discord button styled component with more subtle animation
-const DiscordButton = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
-})`
+const DiscordButton = styled(motion.a)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,9 +128,7 @@ const DiscordButton = styled(motion.a).withConfig({
 `;
 
 // Mobile version of the Discord button
-const MobileDiscordButton = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
-})`
+const MobileDiscordButton = styled(motion.a)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,9 +155,7 @@ const MobileDiscordButton = styled(motion.a).withConfig({
   }
 `;
 
-const MobileMenuButton = styled(motion.button).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
-})`
+const MobileMenuButton = styled(motion.button)`
   display: none;
   background: none;
   border: none;
@@ -248,9 +238,7 @@ const MobileMenu = styled(motion.div)`
 `;
 
 // Mobile nav link styling
-const MobileNavLink = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants', 'animate'].includes(prop),
-})`
+const MobileNavLink = styled(motion.a)`
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.typography.fontSize.lg};
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};

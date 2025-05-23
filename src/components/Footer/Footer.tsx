@@ -27,9 +27,7 @@ const Column = styled(motion.div)`
   gap: ${({ theme }) => theme.spacing.lg};
 `;
 
-const Logo = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
-})`
+const Logo = styled(motion.a)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
@@ -77,24 +75,20 @@ const SocialLinks = styled(motion.div)`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-const SocialLink = styled(motion.a).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants'].includes(prop),
-})`
+const SocialLink = styled(motion.a)`
+  width: 40px;
+  height: 40px;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background: ${({ theme }) => theme.colors.background.secondary};
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: ${({ theme }) => theme.colors.background.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  text-decoration: none;
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: ${({ theme }) => theme.typography.fontSize.xl};
   transition: all 0.2s ease;
 
   &:hover {
     background: ${({ theme }) => theme.colors.accent};
-    color: ${({ theme }) => theme.colors.text.primary};
     transform: translateY(-2px);
   }
 `;

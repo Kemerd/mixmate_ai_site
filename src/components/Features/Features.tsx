@@ -84,9 +84,7 @@ const FeaturesGrid = styled(motion.div)`
   z-index: 2;
 `;
 
-const FeatureCard = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileFocus', 'animate'].includes(prop),
-})`
+const FeatureCard = styled(motion.div)`
   background: ${({ theme }) => `linear-gradient(
     135deg,
     ${theme.colors.background.primary} 0%,
@@ -115,9 +113,7 @@ const FeatureCard = styled(motion.div).withConfig({
   }
 `;
 
-const FeatureIcon = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop),
-})`
+const FeatureIcon = styled(motion.div)`
   width: 48px;
   height: 48px;
   border-radius: ${({ theme }) => theme.borderRadius.md};

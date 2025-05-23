@@ -124,24 +124,46 @@ const CTAContainer = styled(motion.div)`
   }
 `;
 
-const DownloadButton = styled(motion.button).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'whileTap', 'variants', 'disabled'].includes(prop),
-})<{ $disabled?: boolean }>`
-  background: ${({ theme }) => theme.colors.accent};
-  color: ${({ theme }) => theme.colors.text.primary};
-  border: none;
+const DownloadButton = styled(motion.a).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap'].includes(prop),
+})<DownloadButtonProps>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.xl}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background: ${({ theme, $disabled }) => $disabled ? 'rgba(255, 255, 255, 0.08)' : theme.colors.accent};
+  color: ${({ theme }) => theme.colors.text.primary};
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  text-decoration: none;
   font-size: ${({ theme }) => theme.typography.fontSize.base};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
-  pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'auto')};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.accent}dd;
-    transform: translateY(-2px);
+  cursor: ${({ $disabled }) => $disabled ? 'not-allowed' : 'pointer'};
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+  opacity: ${({ $disabled }) => $disabled ? 0.8 : 1};
+  box-shadow: ${({ $disabled }) => $disabled ? 'none' : '0 4px 12px rgba(57, 255, 20, 0.3)'};
+  
+  /* Glow effect */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at center,
+      ${({ theme, $disabled }) => $disabled ? 'rgba(255, 255, 255, 0.05)' : `${theme.colors.accent}60`} 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  &:hover::before {
+    opacity: ${({ $disabled }) => $disabled ? 0.1 : 0.7};
   }
 `;
 
@@ -152,16 +174,18 @@ const ButtonIcon = styled(motion.img)<ButtonIconProps>`
   transition: opacity 0.2s ease-out;
 `;
 
-const ComingSoonBadge = styled(motion.span).withConfig({
-  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop),
-})`
-  background: ${({ theme }) => theme.colors.accent}20;
-  color: ${({ theme }) => theme.colors.accent};
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
+const ComingSoonBadge = styled.span`
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-  border: 1px solid ${({ theme }) => theme.colors.accent}40;
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-transform: uppercase;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
+  letter-spacing: 1px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease-out;
 `;
 
 const DAWInterfaceContainer = styled(motion.div)`
@@ -312,6 +336,7 @@ const Hero: React.FC = React.memo(() => {
 
         <CTAContainer variants={fadeUpVariant}>
           <DownloadButton
+            href="#download-windows"
             variants={bounceScale}
             whileHover={windowsButtonHover}
             whileTap={windowsButtonTap}
@@ -327,9 +352,10 @@ const Hero: React.FC = React.memo(() => {
           
           <DownloadButton
             $disabled={true}
-            variants={memoizedMacOsButtonVariants}
-            whileHover="hover"
-            whileTap="tap"
+            as="div"
+            onMouseEnter={handleMacOsMouseEnter}
+            onMouseLeave={handleMacOsMouseLeave}
+            whileHover={macOsButtonHover}
           >
             <ButtonIcon 
               src={MACOS_LOGO_PATH}
@@ -338,9 +364,7 @@ const Hero: React.FC = React.memo(() => {
               style={macOsIconStyle}
             />
             <ComingSoonBadge
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
+              style={comingSoonStyle}
             >
               Coming Soon
             </ComingSoonBadge>
