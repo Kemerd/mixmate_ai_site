@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 
-// Animation variants
-const macOsButtonVariants = {
+// Move static data outside component to prevent recreation on every render
+const WINDOWS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`;
+const MACOS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/macos.svg`;
+const DAW_INTERFACE_PATH = `${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`;
+
+// Memoize static animation variants to prevent recreation
+const memoizedMacOsButtonVariants = {
   hover: {
     scale: 1.02,
     transition: { type: "spring", stiffness: 300, damping: 15 }
   }
 };
 
-// Define animation variants for the logo and the badge
-const macOsElementVariants = {
+const memoizedMacOsElementVariants = {
   logo: { 
     visible: { opacity: 0.8, scale: 1, display: "block" },
     hidden: { opacity: 0, scale: 0.95, transitionEnd: { display: "none" } }
@@ -23,19 +27,17 @@ const macOsElementVariants = {
   }
 };
 
-// Simplified direct hover animations instead of complex variants
-const macOsLogoVariants = {
+const memoizedMacOsLogoVariants = {
   initial: { opacity: 0.8 },
   hover: { opacity: 0 }
 };
 
-const comingSoonVariants = {
+const memoizedComingSoonVariants = {
   initial: { opacity: 0 },
   hover: { opacity: 1 }
 };
 
-// Define animation variants for the ComingSoonBadge
-const badgeVariants = {
+const memoizedBadgeVariants = {
   rest: { opacity: 0, y: 3, scale: 0.95, transition: { duration: 0.15, ease: "easeOut" } },
   hover: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 350, damping: 12, delay: 0.05 } }
 };
@@ -214,9 +216,98 @@ const DAWInterfaceImage = styled(motion.img)`
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 `;
 
-const Hero: React.FC = () => {
+const Hero: React.FC = React.memo(() => {
   // Add hover state for macOS button
   const [macOsHovered, setMacOsHovered] = useState(false);
+
+  // Memoize event handlers to prevent child re-renders
+  const handleMacOsMouseEnter = useCallback(() => setMacOsHovered(true), []);
+  const handleMacOsMouseLeave = useCallback(() => setMacOsHovered(false), []);
+
+  // Memoize complex animation objects to prevent recreation
+  const windowsButtonAnimation = useMemo(() => ({
+    initial: { boxShadow: "0 4px 12px rgba(57, 255, 20, 0.2)" },
+    animate: {
+      boxShadow: ["0 4px 12px rgba(57, 255, 20, 0.2)", "0 6px 20px rgba(57, 255, 20, 0.4)", "0 4px 12px rgba(57, 255, 20, 0.2)"],
+      y: [0, -3, 0]
+    },
+    transition: {
+      boxShadow: {
+        repeat: Infinity,
+        duration: 3,
+        ease: "easeInOut"
+      },
+      y: {
+        repeat: Infinity,
+        duration: 3,
+        ease: "easeInOut"
+      }
+    }
+  }), []);
+
+  const windowsButtonHover = useMemo(() => ({
+    scale: 1.03,
+    transition: { type: "spring", stiffness: 400, damping: 10 }
+  }), []);
+
+  const windowsButtonTap = useMemo(() => ({
+    scale: 0.98,
+    transition: { type: "spring", stiffness: 400, damping: 10 }
+  }), []);
+
+  const macOsButtonHover = useMemo(() => ({
+    scale: 1.02,
+    transition: { type: "spring", stiffness: 300, damping: 15 }
+  }), []);
+
+  const gradientBackgroundAnimation = useMemo(() => ({
+    animate: {
+      scale: [1, 1.2, 1],
+      rotate: [0, 180, 360],
+    },
+    transition: {
+      duration: 20,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
+    }
+  }), []);
+
+  const dawInterfaceAnimation = useMemo(() => ({
+    initial: { y: 20 },
+    animate: {
+      y: [20, -20, 20],
+    },
+    transition: {
+      duration: 6,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
+      ease: "easeInOut",
+    }
+  }), []);
+
+  const buttonIconAnimation = useMemo(() => ({
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { type: "spring", stiffness: 300, delay: 0.1 }
+  }), []);
+
+  // Memoize style objects to prevent recreation
+  const windowsIconStyle = useMemo(() => ({
+    filter: "invert(23%) sepia(98%) saturate(1640%) hue-rotate(199deg) brightness(96%) contrast(101%)"
+  }), []);
+
+  const macOsIconStyle = useMemo(() => ({
+    filter: "brightness(0) invert(1)",
+    opacity: macOsHovered ? 0 : 0.8
+  }), [macOsHovered]);
+
+  const comingSoonStyle = useMemo(() => ({
+    opacity: macOsHovered ? 1 : 0
+  }), [macOsHovered]);
+
+  const dawImageStyle = useMemo(() => ({
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
+  }), []);
 
   return (
     <HeroSection
@@ -225,15 +316,7 @@ const Hero: React.FC = () => {
       animate="visible"
     >
       <GradientBackground
-        animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, 180, 360],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
+        {...gradientBackgroundAnimation}
       />
 
       <HeroContent>
@@ -253,65 +336,33 @@ const Hero: React.FC = () => {
           <DownloadButton
             href="#download-windows"
             variants={bounceScale}
-            whileHover={{
-              scale: 1.03,
-              transition: { type: "spring", stiffness: 400, damping: 10 }
-            }}
-            whileTap={{
-              scale: 0.98,
-              transition: { type: "spring", stiffness: 400, damping: 10 }
-            }}
-            initial={{ boxShadow: "0 4px 12px rgba(57, 255, 20, 0.2)" }}
-            animate={{
-              boxShadow: ["0 4px 12px rgba(57, 255, 20, 0.2)", "0 6px 20px rgba(57, 255, 20, 0.4)", "0 4px 12px rgba(57, 255, 20, 0.2)"],
-              y: [0, -3, 0]
-            }}
-            transition={{
-              boxShadow: {
-                repeat: Infinity,
-                duration: 3,
-                ease: "easeInOut"
-              },
-              y: {
-                repeat: Infinity,
-                duration: 3,
-                ease: "easeInOut"
-              }
-            }}
+            whileHover={windowsButtonHover}
+            whileTap={windowsButtonTap}
+            {...windowsButtonAnimation}
           >
             <ButtonIcon 
-              src={`${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`}
+              src={WINDOWS_LOGO_PATH}
               alt="Windows logo"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
-              style={{ filter: "invert(23%) sepia(98%) saturate(1640%) hue-rotate(199deg) brightness(96%) contrast(101%)" }}
+              {...buttonIconAnimation}
+              style={windowsIconStyle}
             />
           </DownloadButton>
           
           <DownloadButton
             $disabled={true}
             as="div"
-            onMouseEnter={() => setMacOsHovered(true)}
-            onMouseLeave={() => setMacOsHovered(false)}
-            whileHover={{
-              scale: 1.02,
-              transition: { type: "spring", stiffness: 300, damping: 15 }
-            }}
+            onMouseEnter={handleMacOsMouseEnter}
+            onMouseLeave={handleMacOsMouseLeave}
+            whileHover={macOsButtonHover}
           >
             <ButtonIcon 
-              src={`${process.env.PUBLIC_URL}/assets/images/brand-logos/macos.svg`}
+              src={MACOS_LOGO_PATH}
               alt="MacOS logo" 
               $disabled={true}
-              style={{ 
-                filter: "brightness(0) invert(1)",
-                opacity: macOsHovered ? 0 : 0.8
-              }}
+              style={macOsIconStyle}
             />
             <ComingSoonBadge
-              style={{
-                opacity: macOsHovered ? 1 : 0
-              }}
+              style={comingSoonStyle}
             >
               Coming Soon
             </ComingSoonBadge>
@@ -322,26 +373,18 @@ const Hero: React.FC = () => {
           variants={fadeUpVariant}
         >
           <DAWInterfaceImage
-            src={`${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`}
+            src={DAW_INTERFACE_PATH}
             alt="MixMate AI Application Interface"
-            initial={{ y: 20 }}
-            animate={{
-              y: [20, -20, 20],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-            style={{
-              filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
-            }}
+            {...dawInterfaceAnimation}
+            style={dawImageStyle}
           />
         </DAWInterfaceContainer>
       </HeroContent>
     </HeroSection>
   );
-};
+});
+
+// Add display name for debugging
+Hero.displayName = 'Hero';
 
 export default Hero; 

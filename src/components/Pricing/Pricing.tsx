@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
-import { useRhythmController, createRhythmAnimation } from '../../hooks/useRhythm';
+import { useRhythmController, useRhythmAnimation } from '../../hooks/useRhythm';
 
 const PricingSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -132,7 +132,8 @@ const CTAButton = styled(motion.button) <{ isPopular?: boolean }>`
   }
 `;
 
-const plans = [
+// Move static data outside component to prevent recreation on every render
+const PRICING_PLANS = [
     {
         name: 'Indie Producer',
         price: '$9.99',
@@ -160,49 +161,123 @@ const plans = [
     },
 ];
 
-const Pricing: React.FC = () => {
+// Memoized PricingCard component to prevent unnecessary re-renders
+const MemoizedPricingCard = React.memo<{
+    plan: typeof PRICING_PLANS[0];
+    index: number;
+    currentBeat: number;
+}>(({ plan, index, currentBeat }) => {
+    // Use the new useRhythmAnimation hook directly
+    const intensity = plan.isPopular ? 1.5 : 1;
+    
+    const cardAnimation = useRhythmAnimation(
+        {
+            // Very subtle movement, glow and scale
+            y: -3 * intensity,
+            scale: 1 + (0.005 * intensity),
+            boxShadow: plan.isPopular 
+                ? '0 8px 24px rgba(137, 255, 0, 0.3)'  // Accent color with opacity
+                : '0 6px 16px rgba(0, 0, 0, 0.15)',
+            transition: {
+                duration: 0.2,
+                ease: [0.33, 1, 0.68, 1], // Subtle easing
+            }
+        },
+        {
+            // Return to normal
+            y: 0,
+            scale: 1,
+            boxShadow: plan.isPopular 
+                ? '0 4px 12px rgba(137, 255, 0, 0.2)' // Accent color with opacity
+                : '0 2px 8px rgba(0, 0, 0, 0.1)',
+            transition: {
+                type: "spring",
+                stiffness: 200,
+                damping: 25,
+                duration: 0.4,
+            }
+        },
+        // Popular card pulses on beat 0, non-popular card on beat 2
+        // Creating a nice alternating effect
+        [plan.isPopular ? 0 : 2],
+        120,
+        currentBeat
+    );
+
+    // Memoize hover animation
+    const hoverAnimation = useMemo(() => ({
+        y: -10,
+        transition: {
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+        },
+    }), []);
+
+    // Memoize badge animation
+    const badgeAnimation = useMemo(() => ({
+        initial: { scale: 0 },
+        animate: { scale: 1 },
+        transition: {
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+        }
+    }), []);
+
+    return (
+        <PricingCard
+            variants={fadeUpVariant}
+            isPopular={plan.isPopular}
+            animate={cardAnimation}
+            whileHover={hoverAnimation}
+        >
+            {plan.isPopular && (
+                <PopularBadge
+                    {...badgeAnimation}
+                >
+                    Most Popular
+                </PopularBadge>
+            )}
+
+            <PlanName>{plan.name}</PlanName>
+            <PlanPrice>
+                <span className="amount">{plan.price}</span>
+                <span className="period">{plan.period}</span>
+            </PlanPrice>
+
+            <FeatureList>
+                {plan.features.map((feature, featureIndex) => (
+                    <Feature
+                        key={featureIndex}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                            delay: 0.3 + featureIndex * 0.1,
+                        }}
+                    >
+                        {feature}
+                    </Feature>
+                ))}
+            </FeatureList>
+
+            <CTAButton
+                isPopular={plan.isPopular}
+                variants={bounceScale}
+                whileHover="hover"
+                whileTap="tap"
+            >
+                {plan.isPopular ? 'Start Studio Plan' : 'Start Indie Plan'}
+            </CTAButton>
+        </PricingCard>
+    );
+});
+
+MemoizedPricingCard.displayName = 'MemoizedPricingCard';
+
+const Pricing: React.FC = React.memo(() => {
     const { ref, controls: inViewControls } = useInView();
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
-    
-    // Create subtle animations for pricing cards
-    // Each with a different phase to create interesting visual harmony
-    const createPricingCardAnimation = (index: number, isPopular: boolean = false) => {
-        // More pronounced animation for the popular card, still subtle
-        const intensity = isPopular ? 1.5 : 1;
-        
-        return createRhythmAnimation(
-            {
-                // Very subtle movement, glow and scale
-                y: -3 * intensity,
-                scale: 1 + (0.005 * intensity),
-                boxShadow: isPopular 
-                    ? '0 8px 24px rgba(137, 255, 0, 0.3)'  // Accent color with opacity
-                    : '0 6px 16px rgba(0, 0, 0, 0.15)',
-                transition: {
-                    duration: 0.2,
-                    ease: [0.33, 1, 0.68, 1], // Subtle easing
-                }
-            },
-            {
-                // Return to normal
-                y: 0,
-                scale: 1,
-                boxShadow: isPopular 
-                    ? '0 4px 12px rgba(137, 255, 0, 0.2)' // Accent color with opacity
-                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
-                transition: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 25,
-                    duration: 0.4,
-                }
-            },
-            // Popular card pulses on beat 0, non-popular card on beat 2
-            // Creating a nice alternating effect
-            [isPopular ? 0 : 2],
-            120
-        )(currentBeat);
-    };
 
     return (
         <PricingSection id="pricing" ref={ref}>
@@ -216,70 +291,21 @@ const Pricing: React.FC = () => {
                 </SectionTitle>
 
                 <PricingGrid>
-                    {plans.map((plan, index) => (
-                        <PricingCard
-                            key={index}
-                            variants={fadeUpVariant}
-                            isPopular={plan.isPopular}
-                            animate={createPricingCardAnimation(index, plan.isPopular)} // Apply subtle rhythm animation
-                            whileHover={{
-                                y: -10,
-                                transition: {
-                                    type: 'spring',
-                                    stiffness: 300,
-                                    damping: 20,
-                                },
-                            }}
-                        >
-                            {plan.isPopular && (
-                                <PopularBadge
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{
-                                        type: 'spring',
-                                        stiffness: 300,
-                                        damping: 20,
-                                    }}
-                                >
-                                    Most Popular
-                                </PopularBadge>
-                            )}
-
-                            <PlanName>{plan.name}</PlanName>
-                            <PlanPrice>
-                                <span className="amount">{plan.price}</span>
-                                <span className="period">{plan.period}</span>
-                            </PlanPrice>
-
-                            <FeatureList>
-                                {plan.features.map((feature, featureIndex) => (
-                                    <Feature
-                                        key={featureIndex}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{
-                                            delay: 0.3 + featureIndex * 0.1,
-                                        }}
-                                    >
-                                        {feature}
-                                    </Feature>
-                                ))}
-                            </FeatureList>
-
-                            <CTAButton
-                                isPopular={plan.isPopular}
-                                variants={bounceScale}
-                                whileHover="hover"
-                                whileTap="tap"
-                            >
-                                {plan.isPopular ? 'Start Studio Plan' : 'Start Indie Plan'}
-                            </CTAButton>
-                        </PricingCard>
+                    {PRICING_PLANS.map((plan, index) => (
+                        <MemoizedPricingCard
+                            key={`${plan.name}-${index}`}
+                            plan={plan}
+                            index={index}
+                            currentBeat={currentBeat}
+                        />
                     ))}
                 </PricingGrid>
             </Container>
         </PricingSection>
     );
-};
+});
+
+// Add display name for debugging
+Pricing.displayName = 'Pricing';
 
 export default Pricing; 

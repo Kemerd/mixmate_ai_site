@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAnimation, AnimationControls } from 'framer-motion';
 
 // Global state to ensure a single instance of the rhythm controller
@@ -6,11 +6,20 @@ let globalBeat = 0;
 let globalInterval: NodeJS.Timeout | null = null;
 let observers: ((beat: number) => void)[] = [];
 
+// Memoize beat duration calculation to prevent recalculation
+const memoizedBeatDurations = new Map<number, number>();
+const getBeatDuration = (bpm: number): number => {
+  if (!memoizedBeatDurations.has(bpm)) {
+    memoizedBeatDurations.set(bpm, 60000 / bpm);
+  }
+  return memoizedBeatDurations.get(bpm)!;
+};
+
 // Initialize the global rhythm if it doesn't exist
 const initializeGlobalRhythm = (bpm: number) => {
   if (globalInterval) return;
   
-  const beatDuration = 60000 / bpm;
+  const beatDuration = getBeatDuration(bpm);
   globalInterval = setInterval(() => {
     globalBeat = (globalBeat + 1) % 4;
     // Notify all observers of the beat change
@@ -38,14 +47,14 @@ export const useRhythmController = (bpm = 120) => {
   // Local state that mirrors the global beat
   const [beat, setBeat] = useState(globalBeat);
   
+  // Memoize the observer function to prevent recreation
+  const observer = useCallback((newBeat: number) => {
+    setBeat(newBeat);
+  }, []);
+  
   useEffect(() => {
     // Initialize global rhythm if not already running
     initializeGlobalRhythm(bpm);
-    
-    // Create observer function to update local state
-    const observer = (newBeat: number) => {
-      setBeat(newBeat);
-    };
     
     // Register this component as an observer
     observers.push(observer);
@@ -55,7 +64,7 @@ export const useRhythmController = (bpm = 120) => {
       observers = observers.filter(obs => obs !== observer);
       cleanupGlobalRhythm();
     };
-  }, [bpm]);
+  }, [bpm, observer]);
   
   return beat;
 };
@@ -72,39 +81,48 @@ export const useKickAnimation = (bpm = 120, currentBeat: number): AnimationContr
   const controls = useAnimation();
   const prevBeatRef = useRef<number>(-1);
   
+  // Memoize timing calculations
+  const timingConfig = useMemo(() => {
+    const beatDuration = getBeatDuration(bpm);
+    const kickDuration = 0.1 * beatDuration;
+    return {
+      kickDuration: kickDuration / 1000, // Convert to seconds
+      springDuration: (beatDuration - kickDuration) / 1000,
+    };
+  }, [bpm]);
+
+  // Memoize animation configurations
+  const kickAnimation = useMemo(() => ({
+    height: 1250,
+    y: -10,
+    transition: {
+      duration: timingConfig.kickDuration,
+      ease: [0.04, 0.62, 0.23, 0.98],
+    },
+  }), [timingConfig.kickDuration]);
+
+  const springBackAnimation = useMemo(() => ({
+    height: 1100,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 15,
+      duration: timingConfig.springDuration,
+    },
+  }), [timingConfig.springDuration]);
+  
   // Use effect that reacts to beat changes
   useEffect(() => {
     // Only trigger animation when beat changes
     if (prevBeatRef.current === currentBeat) return;
     prevBeatRef.current = currentBeat;
     
-    // Calculate timing
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    const kickDuration = 0.1 * beatDuration; // Quick expansion (50ms for 120 BPM)
-    
     // Kick on every beat (0,1,2,3)
-    controls.start({
-      // Quick expansion
-      height: 1250,
-      y: -10, // Slight upward movement
-      transition: {
-        duration: kickDuration / 1000, // Convert to seconds
-        ease: [0.04, 0.62, 0.23, 0.98], // Custom easing for quick expansion
-      },
-    }).then(() => {
-      // Spring back
-      controls.start({
-        height: 1100,
-        y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 15,
-          duration: (beatDuration - kickDuration) / 1000, // Remaining time in the beat
-        },
-      });
+    controls.start(kickAnimation).then(() => {
+      controls.start(springBackAnimation);
     });
-  }, [currentBeat, bpm, controls]);
+  }, [currentBeat, controls, kickAnimation, springBackAnimation]);
 
   return controls;
 };
@@ -121,45 +139,52 @@ export const useSnareAnimation = (bpm = 120, currentBeat: number): AnimationCont
   const controls = useAnimation();
   const prevBeatRef = useRef<number>(-1);
   
+  // Memoize timing calculations
+  const timingConfig = useMemo(() => {
+    const beatDuration = getBeatDuration(bpm);
+    const snareDuration = 0.1 * beatDuration;
+    return {
+      snareDuration: snareDuration / 1000,
+      springDuration: (beatDuration - snareDuration) / 1000,
+    };
+  }, [bpm]);
+
+  // Memoize animation configurations
+  const snareAnimation = useMemo(() => ({
+    scale: 1.05,
+    filter: "brightness(1.3) contrast(1.2)",
+    textShadow: "3px 0 0 rgba(255,0,0,0.85), -3px 0 0 rgba(0,255,255,0.85), 0 2px 0 rgba(0,255,0,0.6)",
+    transition: {
+      duration: timingConfig.snareDuration,
+      ease: [0.04, 0.62, 0.23, 0.98],
+    },
+  }), [timingConfig.snareDuration]);
+
+  const resetAnimation = useMemo(() => ({
+    scale: 1,
+    filter: "brightness(1) contrast(1)",
+    textShadow: "0 0 0 rgba(0,0,0,0)",
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 15,
+      duration: timingConfig.springDuration,
+    },
+  }), [timingConfig.springDuration]);
+  
   // Use effect that reacts to beat changes
   useEffect(() => {
     // Only trigger animation when beat changes
     if (prevBeatRef.current === currentBeat) return;
     prevBeatRef.current = currentBeat;
     
-    // Calculate timing
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    const snareDuration = 0.1 * beatDuration; // Same as kick duration (50ms for 120 BPM)
-    
     // Snare only on beats 1 and 3 (second and fourth of each measure)
     if (currentBeat === 1 || currentBeat === 3) {
-      // The snare animation sequence with more pronounced chromatic aberration
-      controls.start({
-        // Quick expansion with enhanced chromatic aberration
-        scale: 1.05,
-        filter: "brightness(1.3) contrast(1.2)",
-        // More pronounced RGB split
-        textShadow: "3px 0 0 rgba(255,0,0,0.85), -3px 0 0 rgba(0,255,255,0.85), 0 2px 0 rgba(0,255,0,0.6)",
-        transition: {
-          duration: snareDuration / 1000,
-          ease: [0.04, 0.62, 0.23, 0.98],
-        },
-      }).then(() => {
-        // Spring back
-        controls.start({
-          scale: 1,
-          filter: "brightness(1) contrast(1)",
-          textShadow: "0 0 0 rgba(0,0,0,0)",
-          transition: {
-            type: "spring",
-            stiffness: 300,
-            damping: 15,
-            duration: (beatDuration - snareDuration) / 1000,
-          },
-        });
+      controls.start(snareAnimation).then(() => {
+        controls.start(resetAnimation);
       });
     }
-  }, [currentBeat, bpm, controls]);
+  }, [currentBeat, controls, snareAnimation, resetAnimation]);
 
   return controls;
 };
@@ -176,44 +201,53 @@ export const useLogoAnimation = (bpm = 120, currentBeat: number): AnimationContr
   const controls = useAnimation();
   const prevBeatRef = useRef<number>(-1);
   
+  // Memoize timing calculations
+  const timingConfig = useMemo(() => {
+    const beatDuration = getBeatDuration(bpm);
+    const animDuration = 0.1 * beatDuration;
+    return {
+      animDuration: animDuration / 1000,
+      springDuration: (beatDuration - animDuration) / 1000,
+    };
+  }, [bpm]);
+
+  // Memoize animation configurations for each beat
+  const getLogoAnimation = useCallback((beat: number) => ({
+    scale: 1.08,
+    rotate: beat === 1 ? 3 : -3,
+    filter: "brightness(1.2) contrast(1.1) drop-shadow(4px 0 0 rgba(255,0,0,0.85)) drop-shadow(-4px 0 0 rgba(0,255,255,0.85)) drop-shadow(0 2px 0 rgba(0,255,0,0.6))",
+    transition: {
+      duration: timingConfig.animDuration,
+      ease: [0.04, 0.62, 0.23, 0.98],
+    },
+  }), [timingConfig.animDuration]);
+
+  const resetAnimation = useMemo(() => ({
+    scale: 1,
+    rotate: 0,
+    filter: "brightness(1) contrast(1) drop-shadow(0 0 0 rgba(0,0,0,0))",
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 15,
+      duration: timingConfig.springDuration,
+    },
+  }), [timingConfig.springDuration]);
+  
   // Use effect that reacts to beat changes
   useEffect(() => {
     // Only trigger animation when beat changes
     if (prevBeatRef.current === currentBeat) return;
     prevBeatRef.current = currentBeat;
     
-    // Calculate timing
-    const beatDuration = 60000 / bpm; // 500ms for 120 BPM
-    const animDuration = 0.1 * beatDuration; // Quick animation (50ms for 120 BPM)
-    
     // Animate on beats 1 and 3 (like the snare)
     if (currentBeat === 1 || currentBeat === 3) {
-      // Logo animation sequence with rotation and chromatic aberration
-      controls.start({
-        // Quick rotation and scale with chromatic aberration
-        scale: 1.08,
-        rotate: currentBeat === 1 ? 3 : -3, // Alternate rotation direction
-        filter: "brightness(1.2) contrast(1.1) drop-shadow(4px 0 0 rgba(255,0,0,0.85)) drop-shadow(-4px 0 0 rgba(0,255,255,0.85)) drop-shadow(0 2px 0 rgba(0,255,0,0.6))",
-        transition: {
-          duration: animDuration / 1000,
-          ease: [0.04, 0.62, 0.23, 0.98],
-        },
-      }).then(() => {
-        // Spring back
-        controls.start({
-          scale: 1,
-          rotate: 0,
-          filter: "brightness(1) contrast(1) drop-shadow(0 0 0 rgba(0,0,0,0))",
-          transition: {
-            type: "spring",
-            stiffness: 300,
-            damping: 15,
-            duration: (beatDuration - animDuration) / 1000,
-          },
-        });
+      const logoAnimation = getLogoAnimation(currentBeat);
+      controls.start(logoAnimation).then(() => {
+        controls.start(resetAnimation);
       });
     }
-  }, [currentBeat, bpm, controls]);
+  }, [currentBeat, controls, getLogoAnimation, resetAnimation]);
 
   return controls;
 };
@@ -228,44 +262,71 @@ export const useLogoAnimation = (bpm = 120, currentBeat: number): AnimationContr
  * @param bpm - Beats per minute (default: 120)
  * @returns Function that takes currentBeat and returns animation controls
  */
+export const useRhythmAnimation = (
+  animationProps: Record<string, any>,
+  resetProps: Record<string, any>,
+  onBeats: number[] = [1, 3],
+  bpm = 120,
+  currentBeat: number
+): AnimationControls => {
+  const controls = useAnimation();
+  const prevBeatRef = useRef<number>(-1);
+  
+  // Memoize timing calculations
+  const timingConfig = useMemo(() => {
+    const beatDuration = getBeatDuration(bpm);
+    const animDuration = 0.1 * beatDuration;
+    return {
+      animDuration: animDuration / 1000,
+      springDuration: (beatDuration - animDuration) / 1000,
+    };
+  }, [bpm]);
+
+  // Memoize animation configurations
+  const memoizedAnimationProps = useMemo(() => ({
+    ...animationProps,
+    transition: {
+      duration: timingConfig.animDuration,
+      ease: [0.04, 0.62, 0.23, 0.98],
+    },
+  }), [animationProps, timingConfig.animDuration]);
+
+  const memoizedResetProps = useMemo(() => ({
+    ...resetProps,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 15,
+      duration: timingConfig.springDuration,
+    },
+  }), [resetProps, timingConfig.springDuration]);
+  
+  useEffect(() => {
+    if (prevBeatRef.current === currentBeat) return;
+    prevBeatRef.current = currentBeat;
+    
+    if (onBeats.includes(currentBeat)) {
+      controls.start(memoizedAnimationProps).then(() => {
+        controls.start(memoizedResetProps);
+      });
+    }
+  }, [currentBeat, controls, memoizedAnimationProps, memoizedResetProps, onBeats]);
+  
+  return controls;
+};
+
+// Keep the old function for backward compatibility but mark as deprecated
 export const createRhythmAnimation = (
   animationProps: Record<string, any>,
   resetProps: Record<string, any>,
   onBeats: number[] = [1, 3],
   bpm = 120
 ) => {
-  return (currentBeat: number): AnimationControls => {
-    const controls = useAnimation();
-    const prevBeatRef = useRef<number>(-1);
-    
-    useEffect(() => {
-      if (prevBeatRef.current === currentBeat) return;
-      prevBeatRef.current = currentBeat;
-      
-      const beatDuration = 60000 / bpm;
-      const animDuration = 0.1 * beatDuration;
-      
-      if (onBeats.includes(currentBeat)) {
-        controls.start({
-          ...animationProps,
-          transition: {
-            duration: animDuration / 1000,
-            ease: [0.04, 0.62, 0.23, 0.98],
-          },
-        }).then(() => {
-          controls.start({
-            ...resetProps,
-            transition: {
-              type: "spring",
-              stiffness: 300,
-              damping: 15,
-              duration: (beatDuration - animDuration) / 1000,
-            },
-          });
-        });
-      }
-    }, [currentBeat, controls]);
-    
-    return controls;
+  // Return a simple object instead of a function that calls hooks
+  return {
+    animationProps,
+    resetProps,
+    onBeats,
+    bpm
   };
 }; 

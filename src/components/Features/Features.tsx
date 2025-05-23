@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
-import { useRhythmController, useKickAnimation, useSnareAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
+import { useRhythmController, useKickAnimation, useSnareAnimation, useRhythmAnimation } from '../../hooks/useRhythm';
 
 // Styled components for the features section
 const FeaturesSection = styled(motion.section)`
@@ -217,83 +217,166 @@ const SubtleText = styled(motion.p)`
   margin-bottom: 0;
 `;
 
-const features = [
+// Move static data outside component to prevent recreation on every render
+const FEATURES_DATA = [
     {
         icon: '🎛️',
-        title: 'Complete DAW Integration',
-        description: 'Connects directly to your DAW through OSC communication, understanding every aspect of your production.',
-        comingSoon: false
+        title: 'Real-time DAW Integration',
+        description: 'Seamlessly integrates with your favorite DAW. No bouncing, no exporting - just instant AI feedback on your mix.',
+        comingSoon: false,
     },
     {
         icon: '🧠',
-        title: 'AI-Powered Mixing Suggestions',
-        description: 'Get context-aware mixing advice based on your specific project, plugins, and genre.',
-        comingSoon: false
+        title: 'Context-Aware Analysis',
+        description: 'Understands your genre, style, and creative intent. Gets smarter with every project you work on.',
+        comingSoon: false,
     },
     {
-        icon: '🔊',
-        title: 'Real-time Audio Analysis',
-        description: 'Advanced analysis of your tracks to understand spectral relationships and provide precise feedback.',
-        comingSoon: true
+        icon: '⚡',
+        title: 'Lightning-Fast Processing',
+        description: 'GPU-accelerated AI processing delivers suggestions in real-time. No waiting, no interruptions to your creative flow.',
+        comingSoon: false,
     },
     {
-        icon: '🎚️',
-        title: 'Parameter Adjustment Guidance',
-        description: 'Learn exactly which knobs to turn and by how much to achieve professional sound.',
-        comingSoon: false
-    },
-    {
-        icon: '🔌',
-        title: 'Plugin Intelligence',
-        description: 'MixMate recognizes all your VSTs and plugins—even custom ones—and understands how to use them effectively.',
-        comingSoon: false
+        icon: '🎯',
+        title: 'Precision Mixing Moves',
+        description: 'Specific, actionable suggestions. "Boost 2.3kHz on the snare by 1.2dB" instead of "make it punchier".',
+        comingSoon: false,
     },
     {
         icon: '📊',
-        title: 'Comprehensive Analysis',
-        description: 'Generates spectrograms, dB analysis, transient detection and dozens of audio metrics.',
-        comingSoon: true
+        title: 'Visual Feedback System',
+        description: 'See exactly what the AI is hearing with detailed frequency analysis and mix visualization.',
+        comingSoon: false,
+    },
+    {
+        icon: '🔄',
+        title: 'Adaptive Learning',
+        description: 'Learns your mixing style and preferences. The more you use it, the better it gets at helping you.',
+        comingSoon: true,
     },
 ];
 
-const Features: React.FC = () => {
+const LOGO_PATH = `${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`;
+const BACKGROUND_SVG_PATH = `${process.env.PUBLIC_URL}/assets/images/squircle_rectangle.svg`;
+
+// Memoized FeatureCard component to prevent unnecessary re-renders
+const MemoizedFeatureCard = React.memo<{
+    feature: typeof FEATURES_DATA[0];
+    index: number;
+    currentBeat: number;
+}>(({ feature, index, currentBeat }) => {
+    // Use the new useRhythmAnimation hook directly
+    const cardAnimation = useRhythmAnimation(
+        {
+            // Extremely subtle movement and shadow
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: {
+                duration: 0.2,
+                ease: [0.33, 1, 0.68, 1], // Subtle easing
+            }
+        },
+        {
+            // Return to normal
+            y: 0,
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+            transition: {
+                type: "spring",
+                stiffness: 200,
+                damping: 25,
+                duration: 0.4,
+            }
+        },
+        // Different timing based on card position
+        [(index % 2 === 0) ? 0 : 2], // Even cards on beat 0, odd cards on beat 2
+        120,
+        currentBeat
+    );
+
+    // Memoize hover animation
+    const hoverAnimation = useMemo(() => ({
+        y: -5,
+        transition: {
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+        },
+    }), []);
+
+    // Memoize icon animation
+    const iconAnimation = useMemo(() => ({
+        initial: { scale: 0 },
+        animate: { scale: 1 },
+        transition: {
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+            delay: index * 0.1,
+        }
+    }), [index]);
+
+    return (
+        <FeatureCard
+            variants={fadeUpVariant}
+            animate={cardAnimation}
+            whileHover={hoverAnimation}
+        >
+            <FeatureIcon
+                {...iconAnimation}
+            >
+                {feature.icon}
+            </FeatureIcon>
+            <FeatureTitle>{feature.title}</FeatureTitle>
+            <FeatureDescription>{feature.description}</FeatureDescription>
+            {feature.comingSoon && (
+                <ComingSoonPill
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 20,
+                        delay: 0.5,
+                    }}
+                >
+                    Coming Soon
+                </ComingSoonPill>
+            )}
+        </FeatureCard>
+    );
+});
+
+MemoizedFeatureCard.displayName = 'MemoizedFeatureCard';
+
+const Features: React.FC = React.memo(() => {
     const { ref, controls: inViewControls } = useInView();
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
     const kickControls = useKickAnimation(120, currentBeat); // Kick on every beat
     const snareControls = useSnareAnimation(120, currentBeat); // Snare on beats 1 & 3
-    
-    // Create subtle animations for each feature card with different offsets
-    // to create a ripple effect across the grid
-    const createCardAnimation = (index: number) => {
-        // Create different offsets based on card index for visual variety
-        const offset = (index % 3) * 0.33; // 0, 0.33, 0.66 offsets
-        
-        return createRhythmAnimation(
-            {
-                // Extremely subtle movement and shadow
-                y: -2,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                transition: {
-                    duration: 0.2,
-                    ease: [0.33, 1, 0.68, 1], // Subtle easing
-                }
-            },
-            {
-                // Return to normal
-                y: 0,
-                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
-                transition: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 25,
-                    duration: 0.4,
-                }
-            },
-            // Different timing based on card position
-            [(index % 2 === 0) ? 0 : 2], // Even cards on beat 0, odd cards on beat 2
-            120
-        )(currentBeat);
-    };
+
+    // Memoize logo hover animation
+    const logoHoverAnimation = useMemo(() => ({
+        scale: 1.05
+    }), []);
+
+    // Memoize logo transition
+    const logoTransition = useMemo(() => ({
+        type: "spring",
+        stiffness: 300
+    }), []);
+
+    // Memoize logo style
+    const logoStyle = useMemo(() => ({
+        filter: "drop-shadow(4px 0 0 rgba(255,0,0,0.85)) drop-shadow(-4px 0 0 rgba(0,255,255,0.85)) drop-shadow(0 2px 0 rgba(0,255,0,0.6))"
+    }), []);
+
+    // Memoize subtitle animation
+    const subtitleAnimation = useMemo(() => ({
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 0.9, y: 0 },
+        transition: { type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }
+    }), []);
 
     return (
         <FeaturesSection id="features" ref={ref}>
@@ -305,7 +388,7 @@ const Features: React.FC = () => {
             >
                 <BackgroundEffectContainer variants={fadeUpVariant}>
                   <BackgroundSVG 
-                    src={`${process.env.PUBLIC_URL}/assets/images/squircle_rectangle.svg`} 
+                    src={BACKGROUND_SVG_PATH}
                     alt=""
                     variants={fadeUpVariant}
                     animate={kickControls} // Apply kick animation controls
@@ -314,15 +397,12 @@ const Features: React.FC = () => {
 
                 <LogoContainer variants={fadeUpVariant}>
                   <Logo 
-                    src={`${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`} 
+                    src={LOGO_PATH}
                     alt="MixMate AI Logo"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    whileHover={logoHoverAnimation}
+                    transition={logoTransition}
                     animate={snareControls} // Apply snare animation controls
-                    style={{
-                      // Apply extreme chromatic aberration manually for more control
-                      filter: "drop-shadow(4px 0 0 rgba(255,0,0,0.85)) drop-shadow(-4px 0 0 rgba(0,255,255,0.85)) drop-shadow(0 2px 0 rgba(0,255,0,0.6))"
-                    }}
+                    style={logoStyle}
                   />
                 </LogoContainer>
 
@@ -334,80 +414,28 @@ const Features: React.FC = () => {
                     variants={fadeUpVariant}
                 >
                     <SubtleText
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 0.9, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+                        {...subtitleAnimation}
                     >
                         No more generic "make it sound better" tools. MixMate AI understands what you're trying to achieve and helps you get there faster.
                     </SubtleText>
                 </TopSpecificSubtleTextContainer>
 
                 <FeaturesGrid>
-                    {features.map((feature, index) => (
-                        <FeatureCard
-                            key={index}
-                            variants={fadeUpVariant}
-                            animate={createCardAnimation(index)} // Apply subtle rhythm animation
-                            whileHover={{
-                                y: -5,
-                                transition: {
-                                    type: 'spring',
-                                    stiffness: 300,
-                                    damping: 20,
-                                },
-                            }}
-                        >
-                            <FeatureIcon
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{
-                                    type: 'spring',
-                                    stiffness: 300,
-                                    damping: 20,
-                                    delay: index * 0.1,
-                                }}
-                            >
-                                {feature.icon}
-                            </FeatureIcon>
-                            <FeatureTitle>{feature.title}</FeatureTitle>
-                            <FeatureDescription>{feature.description}</FeatureDescription>
-                            
-                            {feature.comingSoon && (
-                                <ComingSoonPill
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{
-                                        type: 'spring',
-                                        stiffness: 400,
-                                        damping: 20,
-                                        delay: index * 0.1 + 0.3,
-                                    }}
-                                    whileHover={{
-                                        scale: 1.05,
-                                        transition: { type: 'spring', stiffness: 400 }
-                                    }}
-                                >
-                                    Coming Soon
-                                </ComingSoonPill>
-                            )}
-                        </FeatureCard>
+                    {FEATURES_DATA.map((feature, index) => (
+                        <MemoizedFeatureCard
+                            key={`${feature.title}-${index}`}
+                            feature={feature}
+                            index={index}
+                            currentBeat={currentBeat}
+                        />
                     ))}
                 </FeaturesGrid>
-                
-                <BottomSpecificSubtleTextContainer
-                    variants={fadeUpVariant}
-                >
-                    <SubtleText
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 0.9, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
-                    >
-                        You'll also pick up actual production techniques that no $2,000 masterclass would teach you—because MixMate explains its reasoning instead of just name-dropping famous clients.
-                    </SubtleText>
-                </BottomSpecificSubtleTextContainer>
             </Container>
         </FeaturesSection>
     );
-};
+});
+
+// Add display name for debugging
+Features.displayName = 'Features';
 
 export default Features; 
