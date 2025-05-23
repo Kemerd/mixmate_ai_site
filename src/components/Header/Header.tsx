@@ -324,12 +324,14 @@ const Header: React.FC = () => {
   // Get animation controls for each nav link with slight offsets for wave effect
   const featuresControls = useSineWaveAnimation(120, currentBeat, 0);
   const pricingControls = useSineWaveAnimation(120, currentBeat, 0.25);
-  const supportControls = useSineWaveAnimation(120, currentBeat, 0.5);
+  const technicalControls = useSineWaveAnimation(120, currentBeat, 0.5);
+  const supportControls = useSineWaveAnimation(120, currentBeat, 0.75);
   
   // Array of nav items with their animation controls
   const navItems = [
     { name: 'Features', controls: featuresControls },
     { name: 'Pricing', controls: pricingControls },
+    { name: 'Technical', controls: technicalControls },
     { name: 'Support', controls: supportControls },
   ];
 
