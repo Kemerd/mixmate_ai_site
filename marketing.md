@@ -159,16 +159,14 @@ For the first time, AI speaks your language. Because we built it to understand w
 Look, we've been coding for 72 hours straight on nothing but energy drinks and the burning desire to never hear another poorly mixed track again. Give us a minute to catch our breath before demanding new features.
 
 ## What You Get Right Now:
-
-- **Full Audio Embedding Generation**: Your tracks get transformed into 768-dimensional representations that capture everything from frequency relationships to tonal qualities
-- **Automated Bouncing**: Export sections for analysis without interrupting your workflow
-- **Comprehensive Analysis**: Spectrograms, dB analysis, transient detection, and dozens of other audio metrics
 - **Real-time Mixing Advice**: Get specific, actionable suggestions based on what the AI sees in your project
 - **Parameter Adjustment Guidance**: Learn exactly which knobs to turn and by how much
 - **Complete Plugin Intelligence**: MixMate recognizes all your VSTs and plugins—even custom and third-party ones—and understands what each is capable of. It knows what tools you have available and how best to use them.
 
 ## Coming Soon (When We've Had Some Sleep):
-
+- **Full Audio Embedding Generation**: Your tracks get transformed into 768-dimensional representations that capture everything from frequency relationships to tonal qualities
+- **Automated Bouncing**: Export sections for analysis without interrupting your workflow
+- **Comprehensive Analysis**: Spectrograms, dB analysis, transient detection, and dozens of other audio metrics
 - **Direct DAW Control**: Let MixMate make the changes for you (if you're brave enough)
 - **Automated Gain Staging**: "Your gain structure is a disaster. Let me fix that for you."
 - **Track Creation**: "You need a parallel compression bus for those drums. I'll set it up."

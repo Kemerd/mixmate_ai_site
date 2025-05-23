@@ -7,6 +7,7 @@ import Hero from './components/Hero/Hero';
 import Features from './components/Features/Features';
 import Pricing from './components/Pricing/Pricing';
 import Technical from './components/Technical/Technical';
+import Roadmap from './components/Roadmap/Roadmap';
 import Support from './components/Support/Support';
 import Footer from './components/Footer/Footer';
 
@@ -20,6 +21,7 @@ const App: React.FC = () => {
         <Features />
         <Pricing />
         <Technical />
+        <Roadmap />
         <Support />
         {/* More sections will be added here */}
       </main>

@@ -257,21 +257,6 @@ const Technical: React.FC = React.memo(() => {
   const currentBeat = useRhythmController(120);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Subtle rhythm animation for the main title
-  const titleAnimation = useRhythmAnimation(
-    {
-      backgroundPosition: '200% center',
-      transition: { duration: 0.3, ease: 'easeInOut' }
-    },
-    {
-      backgroundPosition: '0% center',
-      transition: { duration: 0.5, ease: 'easeInOut' }
-    },
-    [0, 2], // Animate on beats 0 and 2
-    120,
-    currentBeat
-  );
-
   const techData = [
     {
       number: "1",
@@ -303,7 +288,6 @@ const Technical: React.FC = React.memo(() => {
       >
         <SectionTitle 
           variants={fadeUpVariant}
-          animate={titleAnimation}
         >
           Under the Hood: How We Built This Monstrosity
         </SectionTitle>
