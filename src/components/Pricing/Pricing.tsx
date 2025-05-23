@@ -156,6 +156,15 @@ const PlanName = styled(motion.h3)`
 
 const PlanPrice = styled(motion.div)`
   margin-bottom: ${({ theme }) => theme.spacing.xl};
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  .price-line {
+    display: flex;
+    align-items: baseline;
+    gap: ${({ theme }) => theme.spacing.xs};
+  }
 
   .amount {
     font-size: ${({ theme }) => theme.typography.fontSize['4xl']};
@@ -166,6 +175,31 @@ const PlanPrice = styled(motion.div)`
   .period {
     font-size: ${({ theme }) => theme.typography.fontSize.base};
     color: ${({ theme }) => theme.colors.text.secondary};
+  }
+`;
+
+const DiscountBadge = styled(motion.div)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.accent}20 0%, ${({ theme }) => theme.colors.accent}10 100%);
+  border: 1px solid ${({ theme }) => theme.colors.accent}40;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  margin-top: ${({ theme }) => theme.spacing.sm};
+  width: fit-content;
+  
+  .discount-text {
+    font-size: ${({ theme }) => theme.typography.fontSize.sm};
+    font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+    color: ${({ theme }) => theme.colors.accent};
+  }
+  
+  .savings-amount {
+    font-size: ${({ theme }) => theme.typography.fontSize.xs};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    text-decoration: line-through;
+    margin-left: ${({ theme }) => theme.spacing.xs};
   }
 `;
 
@@ -245,6 +279,21 @@ const PRO_FEATURES = [
   '#s GPU processing',
 ];
 
+// Utility function to calculate discount percentage and savings
+const calculateDiscount = (monthlyPrice: string, yearlyPrice: string) => {
+  const monthly = parseFloat(monthlyPrice.replace('$', ''));
+  const yearly = parseFloat(yearlyPrice.replace('$', ''));
+  const monthlyAnnual = monthly * 12;
+  const savings = monthlyAnnual - yearly;
+  const discountPercentage = Math.round((savings / monthlyAnnual) * 100);
+  
+  return {
+    discountPercentage,
+    savings: savings.toFixed(2),
+    monthlyAnnual: monthlyAnnual.toFixed(2)
+  };
+};
+
 // Memoized PricingCard component to prevent unnecessary re-renders
 const MemoizedPricingCard = React.memo<{
     plan: {
@@ -260,6 +309,12 @@ const MemoizedPricingCard = React.memo<{
 }>(({ plan, index, currentBeat, isYearly }) => {
     // Use the new useRhythmAnimation hook directly
     const intensity = plan.isPopular ? 1.5 : 1;
+    
+    // Calculate discount information
+    const discountInfo = useMemo(() => 
+        calculateDiscount(plan.monthlyPrice, plan.yearlyPrice), 
+        [plan.monthlyPrice, plan.yearlyPrice]
+    );
     
     const cardAnimation = useRhythmAnimation(
         {
@@ -316,6 +371,19 @@ const MemoizedPricingCard = React.memo<{
         }
     }), []);
 
+    // Memoize discount badge animation
+    const discountBadgeAnimation = useMemo(() => ({
+        initial: { opacity: 0, scale: 0.8, y: 10 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.8, y: -10 },
+        transition: {
+            type: 'spring',
+            stiffness: 400,
+            damping: 25,
+            duration: 0.3
+        }
+    }), []);
+
     return (
         <PricingCard
             variants={fadeUpVariant}
@@ -333,8 +401,23 @@ const MemoizedPricingCard = React.memo<{
 
             <PlanName>{plan.name}</PlanName>
             <PlanPrice>
-                <span className="amount">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
-                <span className="period">{isYearly ? '/year' : '/month'}</span>
+                <div className="price-line">
+                    <span className="amount">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
+                    <span className="period">{isYearly ? '/year' : '/month'}</span>
+                </div>
+                
+                {isYearly && (
+                    <DiscountBadge
+                        {...discountBadgeAnimation}
+                    >
+                        <span className="discount-text">
+                            Save {discountInfo.discountPercentage}% • ${discountInfo.savings} off
+                        </span>
+                        <span className="savings-amount">
+                            ${discountInfo.monthlyAnnual}
+                        </span>
+                    </DiscountBadge>
+                )}
             </PlanPrice>
 
             <FeatureList>
