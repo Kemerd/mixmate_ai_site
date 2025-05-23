@@ -350,6 +350,22 @@ const Hero: React.FC = React.memo(() => {
     { id: 2, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Right" },
   ], []);
 
+  // Touch/swipe handling for mobile
+  const handleDragEnd = useCallback((event: any, info: any) => {
+    const threshold = 50; // Minimum distance for a swipe
+    const { offset } = info;
+    
+    if (Math.abs(offset.x) > threshold) {
+      if (offset.x > 0) {
+        // Swiped right - go to previous card
+        setActiveIndex(prev => Math.max(0, prev - 1));
+      } else {
+        // Swiped left - go to next card
+        setActiveIndex(prev => Math.min(cardData.length - 1, prev + 1));
+      }
+    }
+  }, [cardData.length]);
+
   // Spring transition configuration for smooth card animations
   const springTransition = useMemo(() => ({
     type: "spring",
@@ -438,7 +454,14 @@ const Hero: React.FC = React.memo(() => {
           <motion.div
             animate={carouselGroupAnimation}
           >
-            <CarouselInnerContainer>
+            <CarouselInnerContainer
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={handleDragEnd}
+              style={{ cursor: 'grab' }}
+              whileDrag={{ cursor: 'grabbing' }}
+            >
               <AnimatePresence initial={false}>
                 {cardData.map((card, index) => {
                   const offset = index - activeIndex;
