@@ -17,8 +17,9 @@ const Container = styled(motion.div)`
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 1fr auto;
   gap: ${({ theme }) => theme.spacing['2xl']};
+  align-items: start;
 `;
 
 const Column = styled(motion.div)`
@@ -31,10 +32,61 @@ const Logo = styled(motion.a)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
+  position: relative;
+  transition: transform 0.3s ease;
 
   img {
-    height: 150px;
+    max-height: 120px;
+    max-width: 200px;
     width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    
+    img {
+      filter: 
+        drop-shadow(2px 0 0 #ff0000)
+        drop-shadow(-2px 0 0 #00ffff)
+        drop-shadow(0 2px 0 #ff00ff);
+      animation: glitch 0.3s ease-in-out;
+    }
+  }
+
+  @keyframes glitch {
+    0% {
+      filter: 
+        drop-shadow(0 0 0 #ff0000)
+        drop-shadow(0 0 0 #00ffff)
+        drop-shadow(0 0 0 #ff00ff);
+    }
+    25% {
+      filter: 
+        drop-shadow(3px 0 0 #ff0000)
+        drop-shadow(-3px 0 0 #00ffff)
+        drop-shadow(0 3px 0 #ff00ff);
+    }
+    50% {
+      filter: 
+        drop-shadow(-2px 0 0 #ff0000)
+        drop-shadow(2px 0 0 #00ffff)
+        drop-shadow(0 -2px 0 #ff00ff);
+    }
+    75% {
+      filter: 
+        drop-shadow(1px 0 0 #ff0000)
+        drop-shadow(-1px 0 0 #00ffff)
+        drop-shadow(0 1px 0 #ff00ff);
+    }
+    100% {
+      filter: 
+        drop-shadow(2px 0 0 #ff0000)
+        drop-shadow(-2px 0 0 #00ffff)
+        drop-shadow(0 2px 0 #ff00ff);
+    }
   }
 `;
 
@@ -132,8 +184,8 @@ const Footer: React.FC = () => {
         animate={controls}
       >
         <Column>
-          <Logo href="/" variants={bounceScale} whileHover="hover" whileTap="tap">
-            <img src={`${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`} alt="mixmate.ai Logo" />
+          <Logo href="https://novabox.digital/">
+            <img src={`${process.env.PUBLIC_URL}/assets/logo/small_novabox1.png`} alt="Novabox Logo" />
           </Logo>
           <Description>
             The world's first intelligent production assistant that creates a direct neural bridge between your DAW and advanced AI.
@@ -170,26 +222,6 @@ const Footer: React.FC = () => {
               IG
             </SocialLink>
           </SocialLinks>
-        </Column>
-
-        <Column>
-          <Title>Product</Title>
-          <LinkList>
-            <li><Link as="a" href="#features">Features</Link></li>
-            <li><Link as="a" href="#pricing">Pricing</Link></li>
-            <li><Link as="a" href="#support">Support</Link></li>
-            <li><Link as="a" href="#">Download</Link></li>
-          </LinkList>
-        </Column>
-
-        <Column>
-          <Title>Resources</Title>
-          <LinkList>
-            <li><Link as="a" href="#">Blog</Link></li>
-            <li><Link as="a" href="#">Tutorials</Link></li>
-            <li><Link as="a" href="#">Compatible DAWs</Link></li>
-            <li><Link as="a" href="#">Community</Link></li>
-          </LinkList>
         </Column>
 
         <Column>
