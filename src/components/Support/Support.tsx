@@ -242,11 +242,11 @@ const faqs = [
     },
     {
         question: "What the hell are MixMoves?",
-        answer: "MixMoves are the currency that powers MixMate's AI analysis. Each time MixMate analyzes your tracks, suggests improvements, or saves your mix from disaster, it costs MixMoves. The Indie Producer plan includes 500 per month, Production Studio gets 5000. We called them 'MixMoves' because 'tokens' would scare producers who haven't updated their LinkedIn since 'freelance sound designer' became code for 'unemployed but with cool hardware.'",
+        answer: "MixMoves are the currency that powers MixMate's AI analysis. Each time MixMate analyzes your tracks, suggests improvements, or saves your mix from disaster, it costs MixMoves. The Indie Producer plan includes 1000 per month, Production Studio gets 10'000. We called them 'MixMoves' because 'tokens' would scare producers who haven't updated their LinkedIn since 'freelance sound designer' became code for 'unemployed but with cool hardware.'",
     },
     {
         question: "Is my music data actually secure?",
-        answer: "Well, that's... complicated. We use enterprise-grade encryption and never store your actual audio files without permission. But here's the thing: we do collect your plugin chains, parameter settings, track names, mixing decisions, and basically everything about how you work. We use this data to train our AI models and may retain it indefinitely. Think of it as us learning from your genius (or questionable) production choices. Your paranoia about this directly affects how long our coolest features take to develop, so... maybe don't read the privacy policy too carefully?",
+        answer: "Absolutely. We use enterprise-grade encryption and never store your actual audio files without explicit permission. We do analyze your plugin chains, parameter settings, and mixing decisions to make MixMate smarter for everyone—think of it as crowdsourced mixing wisdom. Your individual tracks stay private, but the collective knowledge helps us build better AI. It's like having thousands of producers secretly teaching each other their best tricks, except it's not secret and everyone benefits.",
     },
     {
         question: "Why is this so cheap compared to other AI tools?",
@@ -262,7 +262,7 @@ const faqs = [
     },
     {
         question: "What happens if I cancel my subscription?",
-        answer: "Your access to MixMate stops immediately, but here's the kicker: we keep all your data forever. Every plugin chain, every mixing decision, every terrible creative choice you've made—it all stays in our training datasets to help future producers avoid your mistakes. Think of it as your legacy. You're welcome, future generations.",
+        answer: "You keep access until the end of your billing period—we're not monsters who cut you off mid-session. After that, MixMate goes to sleep until you decide to wake it up again. We don't typically issue refunds because, let's be honest, credits are expensive and our AI has already done the work. But hey, at least you got some sick mixing advice out of it. Your account and settings stay safe if you want to come back later.",
     },
     {
         question: "Can MixMate fix my terrible songwriting?",

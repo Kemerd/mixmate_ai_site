@@ -191,7 +191,7 @@ const Footer: React.FC = () => {
             The world's first intelligent production assistant that creates a direct neural bridge between your DAW and advanced AI.
           </Description>
           <SocialLinks>
-            <SocialLink
+            {/* <SocialLink
               href="#"
               target="_blank"
               rel="noopener noreferrer"
@@ -220,7 +220,7 @@ const Footer: React.FC = () => {
               whileTap="tap"
             >
               IG
-            </SocialLink>
+            </SocialLink> */}
           </SocialLinks>
         </Column>
 
