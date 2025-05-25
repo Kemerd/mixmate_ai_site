@@ -218,44 +218,46 @@ const SubtleText = styled(motion.p)`
 `;
 
 // Move static data outside component to prevent recreation on every render
+
 const FEATURES_DATA = [
-    {
-        icon: '🎛️',
-        title: 'Real-time DAW Integration',
-        description: 'Seamlessly integrates with your favorite DAW. No bouncing, no exporting - just instant AI feedback on your mix.',
-        comingSoon: false,
-    },
-    {
-        icon: '🧠',
-        title: 'Context-Aware Analysis',
-        description: 'Understands your genre, style, and creative intent. Gets smarter with every project you work on.',
-        comingSoon: false,
-    },
-    {
-        icon: '⚡',
-        title: 'Lightning-Fast Processing',
-        description: 'GPU-accelerated AI processing delivers suggestions in real-time. No waiting, no interruptions to your creative flow.',
-        comingSoon: false,
-    },
-    {
-        icon: '🎯',
-        title: 'Precision Mixing Moves',
-        description: 'Specific, actionable suggestions. "Boost 2.3kHz on the snare by 1.2dB" instead of "make it punchier".',
-        comingSoon: false,
-    },
-    {
-        icon: '📊',
-        title: 'Visual Feedback System',
-        description: 'See exactly what the AI is hearing with detailed frequency analysis and mix visualization.',
-        comingSoon: false,
-    },
-    {
-        icon: '🔄',
-        title: 'Adaptive Learning',
-        description: 'Learns your mixing style and preferences. The more you use it, the better it gets at helping you.',
-        comingSoon: true,
-    },
+  {
+      icon: '🎛️',
+      title: 'Complete DAW Integration',
+      description: 'Connects directly to your DAW through OSC communication, understanding every aspect of your production.',
+      comingSoon: false
+  },
+  {
+      icon: '🧠',
+      title: 'AI-Powered Mixing Suggestions',
+      description: 'Get context-aware mixing advice based on your specific project, plugins, and genre.',
+      comingSoon: false
+  },
+  {
+      icon: '🔊',
+      title: 'Real-time Audio Analysis',
+      description: 'Advanced analysis of your tracks to understand spectral relationships and provide precise feedback.',
+      comingSoon: true
+  },
+  {
+      icon: '🎚️',
+      title: 'Parameter Adjustment Guidance',
+      description: 'Learn exactly which knobs to turn and by how much to achieve professional sound.',
+      comingSoon: false
+  },
+  {
+      icon: '🔌',
+      title: 'Plugin Intelligence',
+      description: 'MixMate recognizes all your VSTs and plugins—even custom ones—and understands how to use them effectively.',
+      comingSoon: false
+  },
+  {
+      icon: '📊',
+      title: 'Comprehensive Analysis',
+      description: 'Generates spectrograms, dB analysis, transient detection and dozens of audio metrics.',
+      comingSoon: true
+  },
 ];
+
 
 const LOGO_PATH = `${process.env.PUBLIC_URL}/assets/logo/logo_text_green_white.svg`;
 const BACKGROUND_SVG_PATH = `${process.env.PUBLIC_URL}/assets/images/squircle_rectangle.svg`;
