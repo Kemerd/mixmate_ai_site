@@ -12,6 +12,24 @@ import Support from './components/Support/Support';
 import Footer from './components/Footer/Footer';
 
 const App: React.FC = () => {
+  // Ensure page always starts at top on mount/refresh
+  React.useEffect(() => {
+    // Disable browser's automatic scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    
+    // Also ensure it happens after any potential layout shifts
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
