@@ -6,6 +6,9 @@ import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/v
 // Move static data outside component to prevent recreation on every render
 const WINDOWS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`;
 const MACOS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/macos.svg`;
+const APP_PREVIEW_1_IMAGE = `${process.env.PUBLIC_URL}/assets/images/app_preview_1.png`;
+const APP_PREVIEW_3_IMAGE = `${process.env.PUBLIC_URL}/assets/images/app_preview_2.png`;
+const APP_PREVIEW_2_IMAGE = `${process.env.PUBLIC_URL}/assets/images/app_preview_3.png`;
 const DAW_INTERFACE_PREVIEW_IMAGE = `${process.env.PUBLIC_URL}/assets/images/mixmate_preview_test.png`;
 
 // Memoize static animation variants to prevent recreation
@@ -342,12 +345,14 @@ const Hero: React.FC = React.memo(() => {
 
   // State for the active card in the carousel
   const [activeIndex, setActiveIndex] = useState(1);
+  // State to track if initial entrance animation has completed
+  const [hasEnteredInitially, setHasEnteredInitially] = useState(false);
 
   // Data for the carousel cards
   const cardData = useMemo(() => [
-    { id: 0, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Left" },
-    { id: 1, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Center" },
-    { id: 2, src: DAW_INTERFACE_PREVIEW_IMAGE, alt: "MixMate AI Interface Preview - Right" },
+    { id: 0, src: APP_PREVIEW_1_IMAGE, alt: "MixMate AI Interface Preview - Session Overview" },
+    { id: 1, src: APP_PREVIEW_2_IMAGE, alt: "MixMate AI Interface Preview - Track Details" },
+    { id: 2, src: APP_PREVIEW_3_IMAGE, alt: "MixMate AI Interface Preview - Full Interface" },
   ], []);
 
   // Touch/swipe handling for mobile
@@ -374,6 +379,16 @@ const Hero: React.FC = React.memo(() => {
     mass: 0.7
   }), []);
   
+  // Premium entrance spring animation - buttery smooth with sophisticated physics
+  const entranceSpringTransition = useMemo(() => ({
+    type: "spring",
+    stiffness: 60,
+    damping: 14,
+    mass: 1.2,
+    restDelta: 0.001,
+    restSpeed: 0.001
+  }), []);
+  
   // Animation for the entire carousel group
   const carouselGroupAnimation = useMemo(() => ({
     y: [5, -5, 5],
@@ -384,6 +399,15 @@ const Hero: React.FC = React.memo(() => {
       ease: "easeInOut",
     }
   }), []);
+
+  // Trigger completion of entrance animation
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasEnteredInitially(true);
+    }, 2000); // After all cards have finished their entrance animation
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <HeroSection
@@ -462,7 +486,7 @@ const Hero: React.FC = React.memo(() => {
               style={{ cursor: 'grab' }}
               whileDrag={{ cursor: 'grabbing' }}
             >
-              <AnimatePresence initial={false}>
+              <AnimatePresence initial={true}>
                 {cardData.map((card, index) => {
                   const offset = index - activeIndex;
                   const isCenter = offset === 0;
@@ -477,6 +501,9 @@ const Hero: React.FC = React.memo(() => {
                       rotateY: 0,
                       opacity: 1,
                       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+                      y: 0,
+                      rotateX: 0,
+                      filter: 'blur(0px)'
                     };
                     zIndex = 3;
                   } else if (offset === -1) {
@@ -486,6 +513,9 @@ const Hero: React.FC = React.memo(() => {
                       rotateY: 40,
                       opacity: 0.6,
                       boxShadow: '0 15px 30px -10px rgba(0, 0, 0, 0.35)',
+                      y: 0,
+                      rotateX: 0,
+                      filter: 'blur(0px)'
                     };
                     zIndex = 2;
                   } else if (offset === 1) {
@@ -495,6 +525,9 @@ const Hero: React.FC = React.memo(() => {
                       rotateY: -40,
                       opacity: 0.6,
                       boxShadow: '0 15px 30px -10px rgba(0, 0, 0, 0.35)',
+                      y: 0,
+                      rotateX: 0,
+                      filter: 'blur(0px)'
                     };
                     zIndex = 2;
                   } else {
@@ -504,6 +537,9 @@ const Hero: React.FC = React.memo(() => {
                       rotateY: offset < 0 ? 60 : -60,
                       opacity: 0,
                       boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+                      y: 0,
+                      rotateX: 0,
+                      filter: 'blur(0px)'
                     };
                     zIndex = 1;
                   }
@@ -511,23 +547,57 @@ const Hero: React.FC = React.memo(() => {
                   const cardHoverEffect = {
                     y: isCenter ? -8 : -12,
                     scale: isCenter ? 1.03 : 0.78,
-                    filter: 'brightness(110%)',
                     boxShadow: isCenter 
                       ? '0 30px 60px -15px rgba(0, 0, 0, 0.5)' 
                       : '0 20px 40px -10px rgba(0, 0, 0, 0.4)',
                   };
 
+                  // Sophisticated entrance animation with liquid-smooth spring physics
+                  const getInitialState = () => {
+                    // Always use entrance animation for initial mount
+                    // Cards start below viewport with elegant positioning
+                    return {
+                      opacity: 0,
+                      scale: 0.3,
+                      x: index === 1 ? "0%" : (index < 1 ? "-45%" : "45%"),
+                      y: 300, // Start from below
+                      rotateY: index === 1 ? 0 : (index < 1 ? 25 : -25),
+                      rotateX: -15, // Subtle 3D tilt
+                      filter: 'blur(10px)', // Start blurred for premium effect
+                    };
+                  };
+
+                  // Calculate staggered delay for liquid cascade effect
+                  const entranceDelay = 0.5 + (Math.abs(index - 1) * 0.15);
+
                   return (
                     <CardWrapper
                       key={card.id}
-                      initial={{ 
-                        opacity: 0, 
-                        scale: 0.5, 
-                        x: index === 1 ? "0%" : (index < 1 ? "-100%" : "100%"),
-                        rotateY: index === 1 ? 0 : (index < 1 ? 45 : -45)
+                      initial={getInitialState()}
+                      animate={{ 
+                        ...animateState, 
+                        zIndex
                       }}
-                      animate={{ ...animateState, zIndex }}
-                      transition={springTransition}
+                      transition={
+                        hasEnteredInitially 
+                          ? springTransition // Use fast spring for position changes after entrance
+                          : {
+                              // Use premium entrance spring for initial animation
+                              ...entranceSpringTransition,
+                              delay: entranceDelay,
+                              // Custom easing for different properties
+                              opacity: {
+                                duration: 1.2,
+                                delay: entranceDelay,
+                                ease: [0.19, 1, 0.22, 1] // Expo.easeOut for opacity
+                              },
+                              filter: {
+                                duration: 1,
+                                delay: entranceDelay + 0.2,
+                                ease: "easeOut"
+                              }
+                            }
+                      }
                       exit={{ opacity: 0, scale: 0.3, transition: { duration: 0.2 } }}
                       onClick={() => setActiveIndex(index)}
                       whileHover={cardHoverEffect}
