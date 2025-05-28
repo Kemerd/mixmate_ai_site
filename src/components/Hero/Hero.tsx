@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
+import LaunchModal from '../LaunchModal/LaunchModal';
 
 // Move static data outside component to prevent recreation on every render
 const WINDOWS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`;
@@ -253,10 +254,23 @@ const CardImage = styled(motion.img)`
 const Hero: React.FC = React.memo(() => {
   // Add hover state for macOS button
   const [macOsHovered, setMacOsHovered] = useState(false);
+  // Add state for launch modal
+  const [showLaunchModal, setShowLaunchModal] = useState(false);
 
   // Memoize event handlers to prevent child re-renders
   const handleMacOsMouseEnter = useCallback(() => setMacOsHovered(true), []);
   const handleMacOsMouseLeave = useCallback(() => setMacOsHovered(false), []);
+  
+  // Handler for Windows button click
+  const handleWindowsClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowLaunchModal(true);
+  }, []);
+  
+  // Handler for closing the modal
+  const handleCloseLaunchModal = useCallback(() => {
+    setShowLaunchModal(false);
+  }, []);
 
   // Memoize complex animation objects to prevent recreation
   const windowsButtonAnimation = useMemo(() => ({
@@ -434,7 +448,8 @@ const Hero: React.FC = React.memo(() => {
 
         <CTAContainer variants={fadeUpVariant}>
           <DownloadButton
-            href="#download-windows"
+            href="#"
+            onClick={handleWindowsClick}
             variants={bounceScale}
             whileHover={windowsButtonHover}
             whileTap={windowsButtonTap}
@@ -614,6 +629,12 @@ const Hero: React.FC = React.memo(() => {
           </motion.div>
         </CarouselOuterContainer>
       </HeroContent>
+      
+      {/* Launch Modal */}
+      <LaunchModal 
+        isOpen={showLaunchModal} 
+        onClose={handleCloseLaunchModal} 
+      />
     </HeroSection>
   );
 });

@@ -1,3 +1,24 @@
 # https://www.robotstxt.org/robotstxt.html
+# MixMate AI Robots.txt
+# We want all the search engines to find us - we're not hiding anything here
+
+# Allow all crawlers full access
 User-agent: *
-Disallow:
+Allow: /
+Crawl-delay: 0
+
+# Specific permissions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+# Point to our sitemap for better indexing
+Sitemap: https://mixmate.ai/sitemap.xml
+
+# No restrictions - we want maximum visibility
+# Unlike our competitors who hide their pricing pages
+# We're proud of our $9.99/month indie pricing

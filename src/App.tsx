@@ -1,7 +1,9 @@
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from 'styled-components';
 import theme from './styles/theme';
 import GlobalStyles from './styles/GlobalStyles';
+import SEO from './components/SEO/SEO';
 import Header from './components/Header/Header';
 import Hero from './components/Hero/Hero';
 import Features from './components/Features/Features';
@@ -31,20 +33,23 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles />
-      <Header />
-      <main>
-        <Hero />
-        <Features />
-        <Pricing />
-        <Technical />
-        <Roadmap />
-        <Support />
-        {/* More sections will be added here */}
-      </main>
-      <Footer />
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider theme={theme}>
+        <SEO />
+        <GlobalStyles />
+        <Header />
+        <main>
+          <Hero />
+          <Features />
+          <Pricing />
+          <Technical />
+          <Roadmap />
+          <Support />
+          {/* More sections will be added here */}
+        </main>
+        <Footer />
+      </ThemeProvider>
+    </HelmetProvider>
   );
 };
 
