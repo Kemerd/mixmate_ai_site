@@ -33,14 +33,14 @@
   "prefer_related_applications": false,
   "screenshots": [
     {
-      "src": "/site_preview.png",
+      "src": "/assets/images/site_preview.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
       "label": "MixMate AI interface showing real-time mixing suggestions"
     },
     {
-      "src": "/site_preview.png",
+      "src": "/assets/images/site_preview.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
