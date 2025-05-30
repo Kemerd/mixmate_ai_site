@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 import { useRhythmController, useRhythmAnimation } from '../../hooks/useRhythm';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
+import { trackExpandContent } from '../../utils/analytics';
 
 const RoadmapSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -185,13 +187,28 @@ const Roadmap: React.FC = React.memo(() => {
   const { ref, controls: inViewControls } = useInView();
   const currentBeat = useRhythmController(120);
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Add section tracking for analytics
+  const roadmapRef = useSectionTracking('roadmap');
 
   const handleToggleExpand = () => {
-    setIsExpanded(!isExpanded);
+    const newExpandedState = !isExpanded;
+    setIsExpanded(newExpandedState);
+    trackExpandContent('roadmap_details', newExpandedState ? 'expand' : 'collapse');
   };
 
   return (
-    <RoadmapSection id="roadmap" ref={ref}>
+    <RoadmapSection id="roadmap" ref={(el) => {
+      // Combine both refs
+      if (typeof ref === 'function') {
+        ref(el);
+      } else if (ref) {
+        (ref as any).current = el;
+      }
+      if (roadmapRef) {
+        (roadmapRef as any).current = el;
+      }
+    }}>
       <Container
         variants={staggerContainer}
         initial="hidden"

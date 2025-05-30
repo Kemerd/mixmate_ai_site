@@ -4,6 +4,7 @@ import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 import { useRhythmController, useKickAnimation, useSnareAnimation, useRhythmAnimation } from '../../hooks/useRhythm';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
 
 // Styled components for the features section
 const FeaturesSection = styled(motion.section)`
@@ -356,6 +357,9 @@ const Features: React.FC = React.memo(() => {
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
     const kickControls = useKickAnimation(120, currentBeat); // Kick on every beat
     const snareControls = useSnareAnimation(120, currentBeat); // Snare on beats 1 & 3
+    
+    // Add section tracking for analytics
+    const featuresRef = useSectionTracking('features');
 
     // Memoize logo hover animation
     const logoHoverAnimation = useMemo(() => ({
@@ -381,7 +385,17 @@ const Features: React.FC = React.memo(() => {
     }), []);
 
     return (
-        <FeaturesSection id="features" ref={ref}>
+        <FeaturesSection id="features" ref={(el) => {
+            // Combine both refs
+            if (typeof ref === 'function') {
+                ref(el);
+            } else if (ref) {
+                (ref as any).current = el;
+            }
+            if (featuresRef) {
+                (featuresRef as any).current = el;
+            }
+        }}>
             <Container
                 variants={staggerContainer}
                 initial="hidden"

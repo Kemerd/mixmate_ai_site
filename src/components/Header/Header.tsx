@@ -3,7 +3,7 @@ import { motion, AnimatePresence, AnimationControls, useAnimation } from 'framer
 import styled from 'styled-components';
 import { slideInRight, bounceScale } from '../../animations/variants';
 import { useRhythmController, useLogoAnimation, createRhythmAnimation } from '../../hooks/useRhythm';
-
+import { trackDiscordClick, trackNavigation } from '../../utils/analytics';
 // Styled components for our header
 const HeaderContainer = styled(motion.header)<{ $isMenuOpen?: boolean; $isAnimating?: boolean }>`
   position: fixed;
@@ -321,6 +321,16 @@ const Header: React.FC = () => {
     setIsMenuAnimating(false); // Exit animation finished, safe to change layout
   };
   
+  // Handler for Discord button clicks
+  const handleDiscordClick = () => {
+    trackDiscordClick('header');
+  };
+  
+  // Handler for navigation link clicks
+  const handleNavClick = (destination: string) => {
+    trackNavigation(destination, 'header');
+  };
+  
   // Get animation controls for each nav link with slight offsets for wave effect
   const featuresControls = useSineWaveAnimation(120, currentBeat, 0);
   const pricingControls = useSineWaveAnimation(120, currentBeat, 0.25);
@@ -369,6 +379,7 @@ const Header: React.FC = () => {
             variants={bounceScale}
             whileHover="hover"
             whileTap="tap"
+            onClick={handleDiscordClick}
             // No rhythm animation here
           >
             <DiscordSVG />
@@ -383,6 +394,7 @@ const Header: React.FC = () => {
               whileHover="hover"
               whileTap="tap"
               animate={item.controls} // Apply subtle sine wave animation
+              onClick={() => handleNavClick(item.name.toLowerCase())}
             >
               {item.name}
             </NavLink>
@@ -414,6 +426,7 @@ const Header: React.FC = () => {
               variants={bounceScale}
               whileHover="hover"
               whileTap="tap"
+              onClick={handleDiscordClick}
             >
               <DiscordSVG />
             </MobileDiscordButton>
@@ -423,7 +436,10 @@ const Header: React.FC = () => {
               <MobileNavLink
                 key={item.name}
                 href={`#${item.name.toLowerCase()}`}
-                onClick={handleMenuToggle}
+                onClick={() => {
+                  handleNavClick(item.name.toLowerCase());
+                  handleMenuToggle();
+                }}
                 variants={bounceScale}
                 whileHover="hover"
                 whileTap="tap"

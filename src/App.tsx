@@ -12,10 +12,18 @@ import Technical from './components/Technical/Technical';
 import Roadmap from './components/Roadmap/Roadmap';
 import Support from './components/Support/Support';
 import Footer from './components/Footer/Footer';
+import { initGA, trackPageView } from './utils/analytics';
 
 const App: React.FC = () => {
-  // Ensure page always starts at top on mount/refresh
+  // Initialize Google Analytics and track page view
   React.useEffect(() => {
+    // Initialize GA
+    initGA();
+    
+    // Track initial page view
+    trackPageView(window.location.pathname + window.location.search);
+    
+    // Ensure page always starts at top on mount/refresh
     // Disable browser's automatic scroll restoration
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';

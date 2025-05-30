@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 import LaunchModal from '../LaunchModal/LaunchModal';
+import { trackDownloadClick } from '../../utils/analytics';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
 
 // Move static data outside component to prevent recreation on every render
 const WINDOWS_LOGO_PATH = `${process.env.PUBLIC_URL}/assets/images/brand-logos/windows.svg`;
@@ -256,6 +258,9 @@ const Hero: React.FC = React.memo(() => {
   const [macOsHovered, setMacOsHovered] = useState(false);
   // Add state for launch modal
   const [showLaunchModal, setShowLaunchModal] = useState(false);
+  
+  // Add section tracking for analytics
+  const heroRef = useSectionTracking('hero');
 
   // Memoize event handlers to prevent child re-renders
   const handleMacOsMouseEnter = useCallback(() => setMacOsHovered(true), []);
@@ -264,6 +269,7 @@ const Hero: React.FC = React.memo(() => {
   // Handler for Windows button click
   const handleWindowsClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    trackDownloadClick('windows');
     setShowLaunchModal(true);
   }, []);
   
@@ -425,6 +431,7 @@ const Hero: React.FC = React.memo(() => {
 
   return (
     <HeroSection
+      ref={heroRef}
       variants={staggerContainer}
       initial="hidden"
       animate="visible"

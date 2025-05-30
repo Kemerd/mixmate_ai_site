@@ -4,6 +4,8 @@ import { motion, useAnimation, AnimationControls } from 'framer-motion';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 import { useRhythmController, useRhythmAnimation } from '../../hooks/useRhythm';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
+import { trackPricingInteraction } from '../../utils/analytics';
 
 const PricingSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -460,6 +462,9 @@ const Pricing: React.FC = React.memo(() => {
     const { ref, controls: inViewControls } = useInView();
     const currentBeat = useRhythmController(120); // Shared rhythm at 120 BPM
     const [isYearly, setIsYearly] = useState(false);
+    
+    // Add section tracking for analytics
+    const pricingRef = useSectionTracking('pricing');
 
     // Define pricing plans with new structure
     const pricingPlans = useMemo(() => [
@@ -480,10 +485,21 @@ const Pricing: React.FC = React.memo(() => {
 
     const handleToggleBilling = useCallback((yearly: boolean) => {
         setIsYearly(yearly);
+        trackPricingInteraction('billing_toggle', yearly ? 'yearly' : 'monthly');
     }, []);
 
     return (
-        <PricingSection id="pricing" ref={ref}>
+        <PricingSection id="pricing" ref={(el) => {
+            // Combine both refs
+            if (typeof ref === 'function') {
+                ref(el);
+            } else if (ref) {
+                (ref as any).current = el;
+            }
+            if (pricingRef) {
+                (pricingRef as any).current = el;
+            }
+        }}>
             <Container
                 variants={staggerContainer}
                 initial="hidden"

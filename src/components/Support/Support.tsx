@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fadeUpVariant, staggerContainer, bounceScale } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 import { useRhythmController, useRhythmAnimation } from '../../hooks/useRhythm';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
+import { trackFAQInteraction, trackDiscordClick } from '../../utils/analytics';
 
 const SupportSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -276,6 +278,9 @@ const Support: React.FC = () => {
     const [contentHeights, setContentHeights] = useState<{ [key: number]: number }>({});
     const contentRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
     
+    // Add section tracking for analytics
+    const supportRef = useSectionTracking('support');
+    
     // Measure content height when FAQ opens
     useEffect(() => {
         if (openFAQ !== null && contentRefs.current[openFAQ]) {
@@ -298,6 +303,18 @@ const Support: React.FC = () => {
             }
         }
     }, [openFAQ]);
+    
+    // Handler for FAQ interactions
+    const handleFAQClick = (index: number, question: string) => {
+        const isCurrentlyOpen = openFAQ === index;
+        setOpenFAQ(isCurrentlyOpen ? null : index);
+        trackFAQInteraction(question, isCurrentlyOpen ? 'collapse' : 'expand');
+    };
+    
+    // Handler for Discord button clicks
+    const handleDiscordClick = () => {
+        trackDiscordClick('support');
+    };
     
     // Get rhythm controller for synced animations
     const currentBeat = useRhythmController(120);
@@ -332,7 +349,18 @@ const Support: React.FC = () => {
     );
 
     return (
-        <SupportSection id="support" ref={ref}>
+        <SupportSection id="support" ref={(el) => {
+            // Assign to useInView ref
+            if (typeof ref === 'function') {
+                ref(el);
+            } else if (ref) {
+                (ref as any).current = el;
+            }
+            // Assign to analytics tracking ref  
+            if (supportRef) {
+                (supportRef as any).current = el;
+            }
+        }}>
             <Container
                 variants={staggerContainer}
                 initial="hidden"
@@ -387,6 +415,7 @@ const Support: React.FC = () => {
                                     whileHover="hover"
                                     whileTap="tap"
                                     animate={discordGlowControls}
+                                    onClick={handleDiscordClick}
                                 >
                                     <DiscordSVG />
                                 </DiscordButton>
@@ -398,7 +427,7 @@ const Support: React.FC = () => {
                         {faqs.map((faq, index) => (
                             <FAQItem key={index}>
                                 <FAQQuestion
-                                    onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+                                    onClick={() => handleFAQClick(index, faq.question)}
                                 >
                                     {faq.question}
                                     <motion.span

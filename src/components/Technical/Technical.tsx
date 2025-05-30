@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fadeUpVariant, staggerContainer } from '../../animations/variants';
 import useInView from '../../hooks/useInView';
 import { useRhythmController, useRhythmAnimation } from '../../hooks/useRhythm';
+import { useSectionTracking } from '../../hooks/useAnalyticsTracking';
+import { trackExpandContent } from '../../utils/analytics';
 
 const TechnicalSection = styled(motion.section)`
   padding: ${({ theme }) => theme.spacing['3xl']} ${({ theme }) => theme.spacing.xl};
@@ -256,6 +258,9 @@ const Technical: React.FC = React.memo(() => {
   const { ref, controls: inViewControls } = useInView();
   const currentBeat = useRhythmController(120);
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Add section tracking for analytics
+  const technicalRef = useSectionTracking('technical');
 
   const techData = [
     {
@@ -276,11 +281,23 @@ const Technical: React.FC = React.memo(() => {
   ];
 
   const handleToggleExpand = () => {
-    setIsExpanded(!isExpanded);
+    const newExpandedState = !isExpanded;
+    setIsExpanded(newExpandedState);
+    trackExpandContent('technical_details', newExpandedState ? 'expand' : 'collapse');
   };
 
   return (
-    <TechnicalSection id="technical" ref={ref}>
+    <TechnicalSection id="technical" ref={(el) => {
+      // Combine both refs
+      if (typeof ref === 'function') {
+        ref(el);
+      } else if (ref) {
+        (ref as any).current = el;
+      }
+      if (technicalRef) {
+        (technicalRef as any).current = el;
+      }
+    }}>
       <Container
         variants={staggerContainer}
         initial="hidden"
