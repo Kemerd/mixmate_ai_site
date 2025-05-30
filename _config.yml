@@ -31,6 +31,11 @@ include:
   - CNAME
   - robots.txt
   - sitemap.xml
+  - manifest.json
+  - humans.txt
+  - ads.txt
+  - security.txt
+  - 404.html
 
 # Exclude from processing
 exclude:
