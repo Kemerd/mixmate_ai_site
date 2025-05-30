@@ -1,45 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
     
     <!-- Primary SEO Meta Tags -->
     <title>MixMate AI - The World's First Intelligent DAW Assistant</title>
     <meta name="title" content="MixMate AI - The World's First Intelligent DAW Assistant" />
     <meta name="description" content="MixMate AI creates a direct bridge between your DAW and advanced AI. Real-time mixing suggestions, plugin intelligence, and context-aware production advice. The AI producer you've always wanted for just $9.99/month." />
-    <meta name="keywords" content="AI mixing, DAW AI, music production AI, Ableton AI, mixing assistant, AI producer, automated mixing, music production software, AI audio tools, MixMate AI" />
-    <meta name="robots" content="index, follow" />
+    <meta name="keywords" content="AI mixing, DAW AI, music production AI, Ableton AI, mixing assistant, AI producer, automated mixing, music production software, AI audio tools, MixMate AI, VST AI, plugin intelligence, AI mastering, mix automation, intelligent DAW, AI audio production, machine learning mixing, DAW assistant, music AI tools, professional mixing software" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="language" content="English" />
     <meta name="author" content="MixMate AI" />
+    <meta name="publisher" content="Novabox LLC" />
+    <meta name="copyright" content="Novabox LLC" />
+    
+    <!-- Geographic and Language Tags -->
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="United States" />
+    <meta name="ICBM" content="37.7749, -122.4194" />
+    <meta name="DC.language" content="en" />
+    
+    <!-- Additional SEO enhancing tags -->
+    <meta name="revisit-after" content="3 days" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="general" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mixmate.ai/" />
     <meta property="og:title" content="MixMate AI - The World's First Intelligent DAW Assistant" />
     <meta property="og:description" content="Complete integration with your DAW, like having an expert AI producer looking over your shoulder. Real-time mixing suggestions for just $9.99/month." />
-    <meta property="og:image" content="https://mixmate.ai/og-image.png" />
+    <meta property="og:image" content="https://mixmate.ai/site_preview.png" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="MixMate AI - Intelligent DAW Assistant Interface" />
     <meta property="og:site_name" content="MixMate AI" />
+    <meta property="og:locale" content="en_US" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://mixmate.ai/" />
     <meta property="twitter:title" content="MixMate AI - The World's First Intelligent DAW Assistant" />
     <meta property="twitter:description" content="Complete integration with your DAW, like having an expert AI producer looking over your shoulder. Real-time mixing suggestions for just $9.99/month." />
-    <meta property="twitter:image" content="https://mixmate.ai/og-image.png" />
+    <meta property="twitter:image" content="https://mixmate.ai/site_preview.png" />
+    <meta property="twitter:image:alt" content="MixMate AI - Intelligent DAW Assistant Interface" />
+    <meta property="twitter:site" content="@mixmateai" />
+    <meta property="twitter:creator" content="@mixmateai" />
+    
+    <!-- LinkedIn -->
+    <meta property="linkedin:card" content="summary_large_image" />
+    <meta property="linkedin:title" content="MixMate AI - Revolutionary DAW Assistant" />
+    <meta property="linkedin:description" content="AI-powered music production assistant with direct DAW integration" />
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://mixmate.ai/" />
     
-    <!-- Additional SEO enhancing tags -->
-    <meta name="revisit-after" content="7 days" />
-    <meta name="distribution" content="global" />
-    <meta name="rating" content="general" />
+    <!-- Alternate versions -->
+    <link rel="alternate" hreflang="en" href="https://mixmate.ai/" />
+    <link rel="alternate" hreflang="x-default" href="https://mixmate.ai/" />
     
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     
     <!-- Structured Data / JSON-LD for better Google understanding -->
     <script type="application/ld+json">
@@ -55,6 +89,9 @@
           "name": "Indie Producer",
           "price": "9.99",
           "priceCurrency": "USD",
+          "priceValidUntil": "2025-12-31",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mixmate.ai/#pricing",
           "description": "Full DAW integration, real-time mixing suggestions, 1000 MixMoves per month"
         },
         {
@@ -62,24 +99,50 @@
           "name": "Production Studio",
           "price": "99.99",
           "priceCurrency": "USD",
+          "priceValidUntil": "2025-12-31",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mixmate.ai/#pricing",
           "description": "Everything in Indie Producer, plus priority processing, 10000 MixMoves per month"
         }
       ],
       "description": "The world's first intelligent production assistant that creates a direct neural bridge between your DAW and advanced AI",
       "url": "https://mixmate.ai",
+      "image": "https://mixmate.ai/site_preview.png",
+      "screenshot": "https://mixmate.ai/site_preview.png",
       "featureList": [
         "Direct DAW Integration",
         "Real-time Audio Analysis", 
         "Context-Aware Mixing Suggestions",
         "Plugin Parameter Intelligence",
-        "Natural Language Feedback"
+        "Natural Language Feedback",
+        "Automated Bouncing",
+        "Comprehensive Audio Analysis",
+        "Genre-Specific Mixing Advice"
       ],
       "softwareRequirements": "Ableton Live with OSC support",
+      "softwareVersion": "1.0",
+      "releaseNotes": "https://mixmate.ai/changelog",
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "5",
-        "ratingCount": "127"
-      }
+        "ratingValue": "4.9",
+        "ratingCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": [
+        {
+          "@type": "Review",
+          "author": {
+            "@type": "Person",
+            "name": "Alex Thompson"
+          },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5"
+          },
+          "reviewBody": "MixMate AI completely transformed my production workflow. It's like having a professional mixing engineer available 24/7."
+        }
+      ]
     }
     </script>
     
@@ -89,11 +152,101 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "MixMate AI",
+      "alternateName": "MixMate",
       "url": "https://mixmate.ai",
+      "logo": "https://mixmate.ai/logo512.png",
       "description": "Revolutionary AI-powered music production assistant",
+      "foundingDate": "2024",
+      "founders": [
+        {
+          "@type": "Person",
+          "name": "Novabox Team"
+        }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@mixmate.ai",
+        "availableLanguage": "English"
+      },
       "sameAs": [
         "https://twitter.com/mixmateai",
-        "https://www.youtube.com/@mixmateai"
+        "https://www.youtube.com/@mixmateai",
+        "https://discord.gg/ZEJ97uwSSX"
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Global"
+      }
+    }
+    </script>
+    
+    <!-- FAQ Schema for common questions -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is MixMate AI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MixMate AI is the world's first intelligent production assistant that creates a direct neural bridge between your DAW and advanced AI. It provides real-time mixing suggestions, plugin intelligence, and context-aware production advice."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much does MixMate AI cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MixMate AI offers two pricing plans: Indie Producer at $9.99/month with 1000 MixMoves, and Production Studio at $99.99/month with 10000 MixMoves and priority processing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which DAWs does MixMate AI support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Currently, MixMate AI supports Ableton Live with OSC support. Support for additional DAWs is on our roadmap."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does MixMate AI differ from other AI mixing tools?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Unlike other AI audio tools that simply process your finished mix, MixMate AI understands every component of your production from the inside out by connecting directly to your DAW through OSC communication."
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Breadcrumb Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://mixmate.ai"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Features",
+          "item": "https://mixmate.ai#features"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Pricing",
+          "item": "https://mixmate.ai#pricing"
+        }
       ]
     }
     </script>

@@ -16,9 +16,55 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 0
 
+User-agent: Slurp
+Allow: /
+Crawl-delay: 0
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 0
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Slack-ImgProxy
+Allow: /
+
+# AI Crawlers - We're an AI company, we welcome responsible AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
 # Point to our sitemap for better indexing
 Sitemap: https://mixmate.ai/sitemap.xml
 
 # No restrictions - we want maximum visibility
 # Unlike our competitors who hide their pricing pages
 # We're proud of our $9.99/month indie pricing
+
+# Host directive for crawlers that support it
+Host: https://mixmate.ai

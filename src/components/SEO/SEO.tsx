@@ -13,7 +13,7 @@ const SEO: React.FC<SEOProps> = ({
   title = "MixMate AI - The World's First Intelligent DAW Production Assistant | $9.99/month",
   description = "MixMate AI creates a direct neural bridge between your DAW and advanced AI. Real-time mixing suggestions, plugin intelligence, and context-aware production advice. The AI producer you've always wanted for just $9.99/month.",
   keywords = "AI mixing, DAW AI, music production AI, Ableton AI, mixing assistant, AI producer, automated mixing, music production software, AI audio tools, MixMate AI",
-  image = "https://mixmate.ai/og-image.png",
+  image = "https://mixmate.ai/site_preview.png",
   url = "https://mixmate.ai"
 }) => {
   // Construct the full title with branding
