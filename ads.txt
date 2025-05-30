@@ -1,0 +1,6 @@
+# MixMate AI Ads.txt
+# Currently no advertising on our site
+# We believe in a clean, focused experience for music producers
+# Contact: business@mixmate.ai for partnership opportunities
+
+placeholder.example.com, placeholder, DIRECT, placeholder 

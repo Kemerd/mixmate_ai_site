@@ -1,0 +1,18 @@
+/* TEAM */
+Company: Novabox LLC
+Site: https://mixmate.ai
+Twitter: @mixmateai
+Location: San Francisco, CA
+
+/* THANKS */
+Name: The music production community for inspiring us to build this
+
+/* TECHNOLOGY */
+Last update: 2024/12/14
+Standards: HTML5, CSS3, ES6+
+Components: React, TypeScript, Styled Components
+Software: Ableton Live, LibTorch, OpenAI
+
+/* MISSION */
+Making professional music production accessible to everyone through AI
+Price: Just $9.99/month because great tools shouldn't break the bank 

@@ -1,0 +1,11 @@
+# MixMate AI Security Policy
+# If you've found a security vulnerability, we appreciate your help in disclosing it responsibly
+
+Contact: security@mixmate.ai
+Expires: 2025-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://mixmate.ai/security.txt
+
+# Our commitment to security
+# We take the security of our users' music production seriously
+# Response time: Within 48 hours 
