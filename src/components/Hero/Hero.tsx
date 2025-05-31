@@ -270,7 +270,10 @@ const Hero: React.FC = React.memo(() => {
   const handleWindowsClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     trackDownloadClick('windows');
-    setShowLaunchModal(true);
+    // Navigate directly to the download URL instead of showing modal
+    window.location.href = 'https://aspcdjmuawftdjuytddc.supabase.co/storage/v1/object/public/app-releases//MixMate_Installer_1_0_0.exe';
+    // Commented out modal display for now
+    // setShowLaunchModal(true);
   }, []);
   
   // Handler for closing the modal
@@ -637,11 +640,11 @@ const Hero: React.FC = React.memo(() => {
         </CarouselOuterContainer>
       </HeroContent>
       
-      {/* Launch Modal */}
-      <LaunchModal 
+      {/* Launch Modal - Commented out for now */}
+      {/* <LaunchModal 
         isOpen={showLaunchModal} 
         onClose={handleCloseLaunchModal} 
-      />
+      /> */}
     </HeroSection>
   );
 });
