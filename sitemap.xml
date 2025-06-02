@@ -54,12 +54,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  
-  <!-- Discord Community -->
-  <url>
-    <loc>https://discord.gg/ZEJ97uwSSX</loc>
-    <lastmod>2024-12-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
 </urlset> 
